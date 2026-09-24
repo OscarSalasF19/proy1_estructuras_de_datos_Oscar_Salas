@@ -67,3 +67,5 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+zinjai-add-mingw64-gcc7-win-20180222.zcp
+zinjai-add-sfml2-w64-20180222.zcp
