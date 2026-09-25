@@ -29,7 +29,7 @@ void Tablero::setCelda(int fila, int celda, int valor){
 			aux = aux->siguiente;
 		}
 		if(celda < 10){
-			aux->celdas[celda] = valor;;	
+			aux->celdas[celda] = valor;	
 		}
 	}
 }
@@ -89,7 +89,6 @@ void Tablero::limpiarLineasCompletas(){
 	for(int i = 0; i < numFilas; i++){
 		if(esFilaCompleta(i)){
 			eliminarFila(i);
-			insertarFilaVaciaAlInicio();
 		}
 	}
 	
