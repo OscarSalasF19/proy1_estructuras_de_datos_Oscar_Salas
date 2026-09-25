@@ -183,12 +183,16 @@ Estructura de archivos final recomendada (crear desde Dia 1):
    - Integrar con Juego::tick() usando sf::Clock y dt.
    - Commit 12: "feat: interfaz SFML basica tablero + piezas + panel lateral"
 
- T3.2 (2h) [R8] Pantallas y Animaciones Obligatorias
-   - Pantallas: Inicio (titulo + "Presione Enter"), Pausa (overlay), Game Over (puntaje + input nombre + boton Replay).
-   - Animacion caida: interpolacion suave (no solo salto de fila) opcional, pero minimo timer visible.
-   - Animacion limpieza linea: parpadeo blanco 200ms antes de eliminar nodo, luego caida visual.
-   - Controles replay al final: botones "< Retroceder" "Avanzar >" "Auto Play" que usan ListaDobleReplay.
-   - Commit 13: "feat: pantallas inicio/pausa/fin + animacion limpieza linea + controles replay"
+  T3.2 (2h) [R8] Pantallas y Animaciones Obligatorias
+    - Pantallas: Inicio (titulo + "Presione Enter"), Pausa (overlay), Game Over (puntaje + input nombre + boton Replay).
+    - Animacion caida: interpolacion suave (no solo salto de fila) opcional, pero minimo timer visible.
+    - Animacion limpieza linea: parpadeo blanco 200ms antes de eliminar nodo, luego caida visual.
+    - Controles replay al final: botones "< Retroceder" "Avanzar >" "Auto Play" que usan ListaDobleReplay.
+    - VISUALIZACION REPLAY SFML (pendiente T1.6): definir cuerpo de ListaDobleReplay::reproducirDesdeInicio() aqui.
+      Por decision 25/09, T1.6 se deja vacio; en T3.2 se implementa recorrido cabeza->cola con sf::Clock 300-500ms,
+      dibujando cada EstadoJuego via InterfazSFML::dibujarEstado(e.getTablero(), e.getPiezaActual(), e.getPuntaje()).
+      Separacion R3 dato / R8 presentacion: ListaDobleReplay solo entrega EstadoJuego, InterfazSFML dibuja. Agregar irAlInicio()/avanzar()/getActual() no-bloqueante para < > y Auto Play sin congelar window.pollEvent.
+    - Commit 13: "feat: pantallas inicio/pausa/fin + animacion limpieza linea + controles replay"
 
  T3.3 (1.5h) [R6] Parte 2 - Persistencia Archivo
    - Puntaje.cpp: guardarTop10(), cargarTop10(), intentarInsertar(nuevoScore) -> ordena con algoritmo seleccionado y guarda top 10 en mejores_puntajes.txt
@@ -332,5 +336,10 @@ Total estimado: 18-20 commits, ~25 horas trabajo distribuidas.
    - Pieza.h: quitar bloques // ================================================= y comentarios extensos
    - Pieza.cpp: quitar comentarios visuales de formas (lineas 4-29) y separadores // ====
    - Mantener solo enum, FORMAS y metodos esenciales para evidenciar autoria (D4)
-2. (pendiente - agregar mas recordatorios aqui)
+2. T1.6 ListaDobleReplay::reproducirDesdeInicio() dejar VACIO de momento (decision 25/09)
+   - Declarar en ListaDobleReplay.h: void reproducirDesdeInicio(); cuerpo vacio en .cpp con comentario // TODO T3.2 definir con SFML
+   - Justificacion: separacion R3 dato / R8 presentacion. R3 no debe incluir <SFML/Graphics.hpp>.
+   - En T3.2 implementar cuerpo: recorrido cabeza->cola con sf::Clock 300-500ms y llamada a InterfazSFML::dibujarEstado(cada EstadoJuego). Agregar metodos no-bloqueantes irAlInicio()/avanzar()/getActual() para botones < Retroceder / Avanzar > y Auto Play sin bloquear window.pollEvent (main.cpp:14).
+   - Visualizacion SFML de partida completa al game over usando ListaDobleReplay desde el inicio.
+3. (pendiente - agregar mas recordatorios aqui)
 ================================================================================

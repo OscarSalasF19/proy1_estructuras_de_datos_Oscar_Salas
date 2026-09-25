@@ -76,7 +76,7 @@ ColaPiezas::~ColaPiezas(){
 		frente = frente->siguiente;
 		delete aux;
 		if(frente == nullptr){
-			final == nullptr;
+			final = nullptr;
 		}
 	}
 }
