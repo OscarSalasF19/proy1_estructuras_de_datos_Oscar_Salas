@@ -4,6 +4,7 @@ EstadoJuego::EstadoJuego(){
 	tablero = Tablero();
 	tablero.crearTableroVacio();
 	this->hold = NINGUNA;
+	this->piezaActual = NINGUNA;
 	this->puntaje = 0;
 	this->lineas = 0;
 	this->nivel = 0;
@@ -18,11 +19,11 @@ EstadoJuego::EstadoJuego(Tablero t, Pieza p, TipoPieza h, int punt, int lin, int
 	this->nivel = niv;
 }
 
-Tablero EstadoJuego::getTablero(){
+Tablero& EstadoJuego::getTablero(){
 	return tablero;
 }
 
-void EstadoJuego::setTablero(Tablero t){
+void EstadoJuego::setTablero(Tablero& t){
 	this->tablero.copiarDesde(t);
 }
 
