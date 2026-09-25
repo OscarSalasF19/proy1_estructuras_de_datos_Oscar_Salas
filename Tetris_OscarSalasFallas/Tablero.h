@@ -12,6 +12,7 @@ private:
 public:
 	Tablero();
 	void crearTableroVacio();
+	void copiarDesde(Tablero& origen);
 	int getCelda(int indice, int celda);
 	void setCelda(int fila, int celda, int valor);
 	bool esFilaCompleta(int indice);

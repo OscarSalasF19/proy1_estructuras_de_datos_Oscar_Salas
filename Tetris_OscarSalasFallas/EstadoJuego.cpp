@@ -10,7 +10,7 @@ EstadoJuego::EstadoJuego(){
 }
 
 EstadoJuego::EstadoJuego(Tablero t, Pieza p, TipoPieza h, int punt, int lin, int niv){
-	this->tablero = t;
+	this->tablero.copiarDesde(t);
 	this->piezaActual = p;
 	this->hold = h;
 	this->puntaje = punt;
@@ -23,7 +23,7 @@ Tablero EstadoJuego::getTablero(){
 }
 
 void EstadoJuego::setTablero(Tablero t){
-	this->tablero = t;
+	this->tablero.copiarDesde(t);
 }
 
 Pieza EstadoJuego::getPiezaActual(){

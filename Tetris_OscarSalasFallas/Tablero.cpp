@@ -3,6 +3,22 @@
 Tablero::Tablero(){
 	this->cabeza = nullptr;
 }
+
+void Tablero::copiarDesde(Tablero& origen){
+	if(this->cabeza == nullptr){
+		crearTableroVacio();
+	}
+	Fila* auxOrigen = origen.cabeza;
+	Fila* auxDestino = this->cabeza;
+	while(auxOrigen && auxDestino){
+		for(int c=0; c<10; c++){
+			auxDestino->celdas[c] = auxOrigen->celdas[c];
+		}
+		auxOrigen = auxOrigen->siguiente;
+		auxDestino = auxDestino->siguiente;
+	}
+}
+
 void Tablero::crearTableroVacio(){
 	for(int i = 0; i < numFilas; i++){
 		insertarFilaVaciaAlInicio();
