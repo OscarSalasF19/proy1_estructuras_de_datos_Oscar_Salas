@@ -1,0 +1,336 @@
+================================================================================
+ PLAN DE DESARROLLO - PROYECTO 1 ESTRUCTURAS DE DATOS (EIF207)
+ Tetris con Estructuras Lineales en C++ / SFML / ZinjaI
+================================================================================
+Estudiante: Oscar Salas Fallas
+Deadline: Domingo 27 de Septiembre de 2026 - 23:59 (hora limite de entrega)
+Inicio: Jueves 24 de Septiembre de 2026
+Enfoque: Trabajo incremental con GIT (commits diarios obligatorios)
+Repositorio: C:\Users\Oscar\Documents\GitHub\proy1_estructuras_de_datos_Oscar_Salas
+Proyecto ZinjaI: Tetris_OscarSalasFallas\Tetris_OscarSalasFallas.zpr
+================================================================================
+
+RESUMEN DE REQUERIMIENTOS OBLIGATORIOS (Segun PDF Proyecto1 - 15%)
+--------------------------------------------------------------------------------
+ [R1] Cola FIFO propia (bolsa 7 piezas aleatorias, ver 3 siguientes) - 8 pts - NO std::queue
+ [R2] Pila LIFO propia Hold capacidad 1 - 4 pts - NO std::stack
+ [R3] Lista Doblemente Enlazada Replay (undo/redo multi-paso + reproduccion) - 16 pts - NO std::list
+ [R4] Cola de Eventos programados ORDENADA por tiempo (min 3 tipos eventos) - 9 pts - NO std::priority_queue
+ [R5] Tablero como Lista Enlazada de 20 nodos (fila=10 celdas), borra/inserta nodos - 12 pts - NO vector<vector> como principal
+ [R6] 2 Algoritmos ordenamiento propios (O(n^2) + O(n log n)) + comparacion empirica + persistencia Top10 archivo - 12 pts - NO std::sort
+ [R7] Mecanica: caida temporizada, colision, rotacion 4 orientaciones (sin wall kick), game over - 11 pts
+ [R8] Interfaz SFML obligatoria (tablero, piezas, siguiente, hold, puntaje, animaciones, pantallas inicio/pausa/fin, controles replay) - 11 pts
+ [R9] Documentacion: Informe 6 pag max (diagrama estructuras, complejidad teorica, grafico tiempos, 4 preguntas analisis) - 7 pts
+ [R10] Calidad+Git: organizacion .h/.cpp por modulo, sin fugas, historial commits real - 10 pts
+ TOTAL: 100 pts * Factor Defensa (0.00-1.00) = Nota Final
+
+ RESTRICCION CRITICA: Si usas std::stack/queue/deque/list/priority_queue/sort donde esta prohibido, o entregas solo consola sin SFML, NOTA=0.
+
+================================================================================
+ ESTRATEGIA GENERAL Y ORDEN DE DEPENDENCIAS
+================================================================================
+Orden logico de implementacion:
+  Estructuras puras (R1,R2,R3,R4,R5) -> Logica juego (R7) -> Integracion -> SFML (R8) -> Ordenamiento/Persistencia (R6) -> Informe/Git (R9,R10)
+
+Regla GIT: Minimo 2-3 commits POR DIA. No se acepta 1 solo commit final.
+  Ejemplo mensaje: "feat: implementa ColaPiezas con bolsa aleatoria y peek 3"
+  Al final exportar: git log --stat --date=short > historial_commits.txt  y mantener carpeta .git en el .zip
+
+Estructura de archivos final recomendada (crear desde Dia 1):
+  Tetris_OscarSalasFallas/
+    main.cpp                    (loop principal SFML)
+    ColaPiezas.h / .cpp          [R1] Nodo + punteros frente/final, bolsa 7, shuffle
+    PilaHold.h / .cpp            [R2] Nodo + tope, capacidad 1
+    ListaDobleReplay.h / .cpp    [R3] Nodo doble (prev/next), EstadoJuego, undo/redo
+    ColaEventos.h / .cpp         [R4] Insercion ordenada por tiempoDisparo
+    Tablero.h / .cpp             [R5] Lista 20 nodos Fila{int celdas[10];}, eliminar/insertar
+    Pieza.h / .cpp               Definicion 7 tetrominos + 4 rotaciones precalculadas
+    Ordenamiento.h / .cpp        [R6] insertionSort + quicksort + benchmark
+    Puntaje.h / .cpp             [R6] struct Score, archivo mejores_puntajes.txt
+    Juego.h / .cpp               [R7] Orquesta todo: caida, colision, lineas, game over
+    InterfazSFML.h / .cpp        [R8] Dibujo, animaciones, pantallas, input
+    Constantes.h                 Tam tablero, colores, tiempos
+  Raiz:
+    README.md                    Como compilar/ejecutar en ZinjaI + SFML
+    Informe_Proyecto1.pdf        Max 6 paginas
+    mejores_puntajes.txt         Generado por programa
+    historial_commits.txt
+
+================================================================================
+ DIA 1 - JUEVES 24 SEPTIEMBRE: CLASES / ESTRUCTURAS DE DATOS PURAS (Base)
+ Objetivo: Todas las estructuras lineales compilando y testeables en consola.
+ Horario sugerido: 15:00-23:00 (8h con pausas)
+================================================================================
+[MANANA/TARDE 4h] - Esqueleto y Estructuras Simples
+
+  T1.1 (1h) Preparar proyecto ZinjaI y GIT
+    - Verificar que SFML compila con main.cpp de ejemplo (ya existe).
+    - Crear rama/feature o trabajar en main pero con commits pequenos.
+    - Crear Constantes.h y Pieza.h (definir enum TipoPieza {I,O,T,S,Z,J,L}, struct Bloque, int formas[7][4][4][4])
+    - DECISION DE DISENO (24/09/2026): Getters de Pieza SIN const final. No se usa const-correctness
+      porque no se vio en el curso EIF207; se prioriza que el codigo refleje 100% lo visto en clase (D4).
+      Pieza.h: getTipo()/getRotacion()/getX()/getY()/getColor()/getMatriz()/getMatrizRot() sin const.
+      Consecuencia: Tablero/Juego usaran pasaje por referencia no-const (Pieza&) o por valor, no const Pieza&.
+    - Commit 1: "chore: estructura inicial de archivos y constantes"
+
+ T1.2 (1.5h) [R1] ColaPiezas - COLA FIFO PROPIA
+   - Clase ColaPiezas { struct Nodo{TipoPieza dato; Nodo* sig;}; Nodo *frente,*final; int tam; }
+   - Metodos: encolar(TipoPieza), desencolar(), frente(), vacia(), tam(), peek3(vector<TipoPieza>), rellenarBolsa()
+   - Logica bolsa: vector<TipoPieza> bolsa={I,O,T,S,Z,J,L}; shuffle con rand()/mt19937; encolar 7 al vaciarse.
+   - Test en main temporal (consola): generar 21 piezas (3 bolsas) y mostrar peek3.
+   - Commit 2: "feat: ColaPiezas FIFO propia con sistema bolsa 7 aleatoria"
+
+ T1.3 (1h) [R2] PilaHold - PILA LIFO PROPIA capacidad 1
+   - Clase PilaHold { struct Nodo{TipoPieza dato; Nodo* sig;}; Nodo* tope; bool ocupada; }
+   - Metodos: push(TipoPieza) (si ocupada->intercambia), pop(), top(), vacia(), estaOcupada()
+   - Logica juego: hold() intercambia piezaActual con hold, con flag yaHizoHoldEsteTurno.
+   - Test consola: push I, push T (debe intercambiar), pop.
+   - Commit 3: "feat: PilaHold LIFO propia capacidad 1 con intercambio"
+
+ T1.4 (0.5h) Verificacion
+   - Compilar sin errores ni warnings.
+   - No usar std::queue/stack en estos archivos (grep para verificar).
+
+[TARDE/NOCHE 4h] - Estructuras Complejas
+
+ T1.5 (1.5h) [R5] Tablero - LISTA ENLAZADA DE FILAS
+   - Clase Tablero { struct Fila{int celdas[10]; Fila* sig;}; Fila* cabeza; int numFilas=20; }
+   - Metodos: crearTableroVacio(), getFila(int idx), setCelda(fila,col,val), esFilaCompleta(idx), eliminarFila(idx), insertarFilaVaciaAlInicio(), limpiarLineasCompletas()->int cant, estaOcupada(f,c), imprimirConsola()
+   - CLAVE: limpiarLineas: recorrer lista, si fila completa -> eliminar nodo y crear nuevo nodo vacio al inicio (mantener 20 nodos siempre).
+   - Complejidad a documentar: eliminar/insertar O(n) en peor caso, pero cabeza O(1).
+   - Test consola: llenar 2 filas completas, llamar limpiarLineas, imprimir.
+   - Commit 4: "feat: Tablero como lista enlazada 20 nodos con limpieza de lineas"
+
+ T1.6 (1.5h) [R3] ListaDobleReplay - LISTA DOBLEMENTE ENLAZADA
+   - Clase ListaDobleReplay { struct Nodo{EstadoJuego estado; Nodo *prev,*next;}; Nodo *cabeza,*cola,*actual; int tam; }
+   - EstadoJuego debe guardar: Tablero (copia lista), piezaActual, puntaje, lineas, copia profunda.
+   - Metodos: agregarEstado(Estado), deshacer()->Estado (actual=actual->prev), rehacer()->Estado (actual=actual->next), reiniciar(), reproducirDesdeInicio(callback), tam(), puedeDeshacer(), puedeRehacer()
+   - CRITICO: Cada movimiento relevante (mover, rotar, bajar, colocar) = nuevo nodo despues de actual (y borrar futuros si habia hecho undo).
+   - Test consola: 5 estados, deshacer 2, rehacer 1, agregar nuevo (debe truncar).
+   - Commit 5: "feat: ListaDobleReplay con undo/redo multi-paso y replay completo"
+
+ T1.7 (1h) [R4] ColaEventos - COLA ORDENADA POR TIEMPO
+   - Clase ColaEventos { struct Evento{tipo, momentoDisparo (int ms o lineas), efecto}; struct Nodo{Evento e; Nodo* sig;}; Nodo* cabeza; }
+   - NO es FIFO simple: insertarOrdenado(Evento) recorre lista para insertar en posicion correcta (menor momento al frente).
+   - Tipos de eventos (min 3 a definir y documentar): 1) AumentoVelocidad cada 5 lineas, 2) PiezaEspecial limpia fila, 3) BonusPuntaje temporal / Niebla / etc.
+   - Metodos: programar(Evento), proximo()->Evento, debeDispararse(tiempoActual), disparar()->Evento, vacia(), peek()
+   - Test consola: programar eventos en desorden (t=5000, t=1000, t=3000) y verificar que frente es 1000.
+   - Commit 6: "feat: ColaEventos ordenada por momento disparo con insercion ordenada"
+
+ CHECKPOINT DIA 1 (23:00):
+  [ ] 5 estructuras compilan sin STL prohibido
+  [ ] Tests de consola pasan para las 5
+  [ ] 6 commits en git log
+  [ ] push a GitHub
+
+================================================================================
+ DIA 2 - VIERNES 25 SEPTIEMBRE: LOGICA CENTRAL DEL JUEGO (Sin graficos aun)
+ Objetivo: Jugar Tetris completo en consola / logica testeable.
+ Horario sugerido: 09:00-19:00
+================================================================================
+  T2.1 (2h) [R7] Pieza + Rotacion + Colision
+    - Pieza.h: clase Pieza {TipoPieza tipo; int rotacion(0-3); int x,y; int getMatriz()[4][4];} [SIN const en getters por decision T1.1]
+    - Precalcular 4 matrices 4x4 por cada pieza (28 matrices total). Sin wall kick: si colisiona, no rota.
+    - Tablero::puedeColocar(Pieza& pieza) o (Pieza pieza) -> verifica bordes + celdas ocupadas. NO usar const Pieza& por decision T1.1.
+   - Test: crear pieza T en (3,0), rotar 4 veces, mover, verificar colision con suelo.
+   - Commit 7: "feat: Piezas 7 tetrominos con 4 rotaciones y deteccion colision"
+
+ T2.2 (2h) [R7] Juego - Caida, Movimiento, Lineas, Game Over
+   - Clase Juego {Tablero tablero; ColaPiezas cola; PilaHold hold; ColaEventos eventos; Pieza *actual,*siguiente; int puntaje, lineas, nivel; float tiempoCaida; bool gameOver; ListaDobleReplay historial;}
+   - Metodos: iniciar(), spawnPieza() (saca de cola, verifica game over si colision en spawn), moverIzq/Der(), rotar(), bajar(), hardDrop(), tick(float dt) (caida automatica), fijarPieza(), verificarLineas()
+   - Formula puntaje (definir y documentar): ej. 100*lineas + 300 si 2 lineas + 500 si 3 + 800 si 4 (Tetris), nivel = lineas/10.
+   - Eventos: al limpiar lineas, programar aumento velocidad: tiempoCaida = max(100ms, 1000 - nivel*100)
+   - Cada accion -> historial.agregarEstado(snapshot).
+   - Commit 8: "feat: nucleo Juego con caida temporizada, movimiento y game over"
+
+ T2.3 (1.5h) Integracion y Test de Flujo Completo en Consola
+   - main.cpp temporal modo consola: loop que imprime tablero ASCII, lee WASD (a=izq,d=der,w=rotar,s=bajar, h=hold, q=salir), llama Juego::tick().
+   - Probar: jugar 5 piezas, forzar lineas completas, probar hold, probar undo/redo con u/r.
+   - Verificar que Replay puede recorrer desde inicio e imprimir paso a paso.
+   - Commit 9: "test: flujo completo en consola con hold y replay undo/redo"
+
+ T2.4 (1.5h) [R6] Parte 1 - Ordenamiento y Puntaje (logica, sin archivo aun)
+   - Estructura Score {string nombre; int puntos; string fecha;}
+   - Ordenamiento.h: void insertionSort(vector<Score>&) O(n^2) y void quickSort(vector<Score>&,0,n-1) O(n log n)
+   - Implementacion propia, sin std::sort. Permitir seleccionar algoritmo via parametro.
+   - Funcion benchmark(n): generar n scores aleatorios, medir tiempo chrono de ambos, retornar tiempos.
+   - Commit 10: "feat: dos algoritmos ordenamiento propios + benchmark comparativo"
+
+ T2.5 (1h) Pulido logica + Fugas memoria
+   - Revisar new/delete en todas las listas (destructores ~Cola, ~Tablero, ~ListaDoble, ~ColaEventos).
+   - Valgrind mental / revisar leaks: cada new Nodo debe tener delete en desencolar/eliminar.
+   - Commit 11: "fix: destructores y liberacion memoria en estructuras"
+
+ CHECKPOINT DIA 2:
+  [ ] Se puede jugar partida completa en consola (sin SFML)
+  [ ] Lineas se limpian correctamente (lista enlazada)
+  [ ] Hold funciona (pila)
+  [ ] Undo/Redo multi-paso funciona
+  [ ] Eventos se disparan ordenados
+  [ ] Ordenamiento ordena Top10 de mayor a menor
+  [ ] 5 commits del dia, total 11
+
+================================================================================
+ DIA 3 - SABADO 26 SEPTIEMBRE: INTERFAZ GRAFICA SFML + ANIMACIONES + PERSISTENCIA
+ Objetivo: Todo lo visual y jugable con ventana real. Es el dia mas pesado.
+ Horario sugerido: 09:00-22:00
+================================================================================
+ T3.1 (3h) [R8] Interfaz Basica SFML
+   - InterfazSFML.h: clase que maneja RenderWindow 800x600 o 640x480, fuentes, texturas.
+   - Dibujar: Tablero (20x10 celdas, cada celda 24px), Pieza actual (color por tipo), Sombra/ghost opcional.
+   - Panel lateral: Proximas 3 piezas (usar ColaPiezas.peek3()), Hold (PilaHold.top()), Puntaje/Nivel/Lineas.
+   - Controles: Flechas izq/der/abajo, Arriba/Z para rotar, C/Shift para hold, Espacio hard drop, P pausa.
+   - Integrar con Juego::tick() usando sf::Clock y dt.
+   - Commit 12: "feat: interfaz SFML basica tablero + piezas + panel lateral"
+
+ T3.2 (2h) [R8] Pantallas y Animaciones Obligatorias
+   - Pantallas: Inicio (titulo + "Presione Enter"), Pausa (overlay), Game Over (puntaje + input nombre + boton Replay).
+   - Animacion caida: interpolacion suave (no solo salto de fila) opcional, pero minimo timer visible.
+   - Animacion limpieza linea: parpadeo blanco 200ms antes de eliminar nodo, luego caida visual.
+   - Controles replay al final: botones "< Retroceder" "Avanzar >" "Auto Play" que usan ListaDobleReplay.
+   - Commit 13: "feat: pantallas inicio/pausa/fin + animacion limpieza linea + controles replay"
+
+ T3.3 (1.5h) [R6] Parte 2 - Persistencia Archivo
+   - Puntaje.cpp: guardarTop10(), cargarTop10(), intentarInsertar(nuevoScore) -> ordena con algoritmo seleccionado y guarda top 10 en mejores_puntajes.txt
+   - Formato archivo: nombre;puntos;fecha por linea.
+   - Al terminar partida, si puntaje entra en top10, pedir nombre con sf::Text input y guardar.
+   - Mostrar tabla mejores puntajes ordenada en pantalla (puede elegir algoritmo via tecla 1/2).
+   - Commit 14: "feat: persistencia Top10 en archivo con ordenamiento seleccionable"
+
+ T3.4 (1.5h) [R4] Eventos Visuales + Pulido
+   - Implementar visualmente los 3 eventos: ej. 1) Acelera caida (cambia color fondo), 2) Pieza especial dorada limpia fila al colocarse, 3) Puntos x2 por 10 seg.
+   - Mostrar en UI "Proximo evento en: X seg" sacado de ColaEventos.peek().
+   - Probar que insercion ordenada mantiene frente correcto.
+   - Commit 15: "feat: eventos programados visuales (velocidad, pieza especial, bonus)"
+
+ T3.5 (2h) Integracion Final y Test Jugable
+   - Jugar 3 partidas completas hasta game over, probar todas las mecanicas: hold, rotar contra pared (debe bloquear), lineas multiples, replay completo.
+   - Ajustar tamano ventana, colores, fuentes legibles.
+   - Verificar que NO se usa std::stack/queue/list/priority_queue/sort (grep -r "std::stack" etc debe dar 0 en archivos prohibidos).
+   - Commit 16: "test: integracion SFML completa y prueba jugable end-to-end"
+
+ CHECKPOINT DIA 3:
+  [ ] Ventana SFML jugable, no solo consola
+  [ ] Se ven 3 siguientes + hold + puntaje
+  [ ] Animaciones y pantallas existen
+  [ ] Replay visual con retroceder/avanzar
+  [ ] Archivo mejores_puntajes.txt se genera y ordena
+  [ ] 5 commits del dia, total 16
+
+================================================================================
+ DIA 4 - DOMINGO 27 SEPTIEMBRE: INFORME, README, GIT, EMPAQUETADO Y DEFENSA
+ Objetivo: Entregables pulidos y defensa preparada. Entrega 23:59.
+ Horario sugerido: 09:00-23:00 (entrega temprano 20:00 para margen)
+================================================================================
+ T4.1 (2h) README + Limpieza Codigo
+   - README.md completo: descripcion, estructuras usadas y justificacion, como compilar en ZinjaI (pasos: abrir .zpr, compilar Debug_Win32, dependencias SFML), como ejecutar, controles, formula puntaje, eventos definidos, autor.
+   - Limpieza: comentarios claros en cada .h, eliminar codigo muerto, asegurar organizacion por modulo .h/.cpp, sin warnings.
+   - Verificar que carpeta Tetris_OscarSalasFallas compila limpio en ZinjaI.
+   - Commit 17: "docs: README completo y limpieza codigo"
+
+ T4.2 (2.5h) [R9] Informe PDF (Max 6 paginas) - HACERLO EN WORD/GOOGLE DOCS Y EXPORTAR PDF
+   Estructura obligatoria:
+    Pag 1: Portada + Diagrama de relacion entre estructuras (dibujo: ColaPiezas->Juego, PilaHold->Juego, Tablero lista->Juego, ListaDobleReplay->Juego, ColaEventos->Juego, Ordenamiento->Puntaje)
+    Pag 2: Complejidad teorica de cada operacion (tabla: encolar O(1), desencolar O(1), push O(1), pop O(1), insertarFila O(1) cabeza, eliminarFila O(n), limpiarLineas O(n), deshacer/rehacer O(1), insertarEvento O(n), insertionSort O(n^2), quickSort O(n log n))
+    Pag 3: Grafico/tabla tiempos medidos benchmark (ejecutar benchmark con n=10,100,1000,10000, medir con chrono, graficar en Excel)
+    Pag 4-5: Respuestas a 4 preguntas analisis obligatorias:
+      P1: Comparacion tiempos O(n^2) vs O(n log n), desde que n se nota diferencia, coincide con teoria?
+      P2: Por que lista enlazada es razonable para tablero y costo insertar/eliminar fila?
+      P3: Por que replay necesita lista DOBLE y no simple? Costo retroceder/avanzar?
+      P4: Como cola eventos mantiene frente mas proximo y complejidad insertar?
+    Pag 6: Conclusiones + Referencias + Manual corto
+   - Commit 18: "docs: informe PDF con complejidades, benchmarks y preguntas analisis"
+
+ T4.3 (1.5h) Benchmark Real y Archivo Puntajes de Prueba
+   - Generar mejores_puntajes.txt de ejemplo con 10 entradas reales jugando.
+   - Ejecutar programa benchmark con 10/100/1000/10000 registros, tomar tiempos reales, poner en informe.
+   - Verificar que tabla se muestra ordenada de mayor a menor siempre.
+   - Commit 19: "test: benchmark empirico 10-10000 y archivo puntajes ejemplo"
+
+ T4.4 (1h) GIT Historial y Empaquetado Final
+   - git log --stat --date=short > historial_commits.txt  (o exportar .git completo)
+   - git status debe estar limpio, push final a GitHub.
+   - Crear .zip final: Proyecto1_OscarSalas_[Cedula].zip con: codigo fuente .h/.cpp + .zpr, carpeta .git o historial_commits.txt, mejores_puntajes.txt, Informe.pdf, README.md
+   - Probar descomprimir en otra carpeta y compilar de cero.
+   - Commit 20: "chore: empaquetado final entrega .zip"
+
+  T4.5 (2h) Preparacion Defensa Oral (Factor multiplicador 0.00-1.00)
+    - Preparar explicacion 5 min por estructura: por que esa estructura para esa mecanica, alternativas descartadas.
+    - Ensayar D1 Dominio tecnico (que hace cada componente), D2 Justificacion (por que no std::queue, por que lista y no array), D3 Preguntas imprevistas (practicar modificar codigo en vivo: cambiar capacidad hold a 2, cambiar velocidad), D4 Comunicacion (terminologia FIFO/LIFO/O(n)).
+    - Justificacion preparada para getters sin const: "No se vio const-correctness en EIF207, se priorizo codigo 100% visto en clase para evidenciar autoria (decision documentada en T1.1)".
+   - Hacer prueba en vivo: mostrar git log, mostrar que no hay STL prohibido, jugar partida y mostrar replay.
+   - Entrega en aula virtual antes de 22:00 (margen 2h antes de 23:59).
+
+ CHECKPOINT FINAL DOMINGO 22:00:
+  [ ] Codigo .h/.cpp por modulo, sin fugas, sin STL prohibido
+  [ ] Ventana SFML jugable + animaciones + pantallas + replay controles
+  [ ] Archivo mejores_puntajes.txt generado y ordenado con 2 algoritmos
+  [ ] Informe PDF max 6 pag con diagrama, complejidades, grafico tiempos, 4 respuestas
+  [ ] README con instrucciones compilacion
+  [ ] Historial git con 20+ commits incrementales (no 1 solo)
+  [ ] .zip probado y subido antes de 23:59
+
+================================================================================
+ CRONOGRAMA RESUMIDO POR DIAS
+================================================================================
+ Jueves 24 (HOY) : Clases/Estructuras puras      -> 6 commits -> Base compilable
+ Viernes 25      : Logica juego + colision       -> 5 commits -> Jugable en consola
+ Sabado 26       : SFML + Animaciones + Archivo  -> 5 commits -> Jugable grafico
+ Domingo 27      : Informe + README + Entrega    -> 4 commits -> Entregable final
+
+Total estimado: 18-20 commits, ~25 horas trabajo distribuidas.
+
+================================================================================
+ RIESGOS Y MITIGACION
+================================================================================
+ - Riesgo: SFML no compila en ZinjaI -> Mitigacion: Probar Dia 1 temprano, usar config Debug_Win32 ya existente, no cambiar libs.
+ - Riesgo: Fugas memoria en listas -> Mitigacion: Destructores Dia 2 T2.5, test con multiples partidas.
+ - Riesgo: Quedarse atascado en SFML -> Mitigacion: Dia 2 tener juego consola funcional como respaldo (aunque entrega final debe ser SFML).
+ - Riesgo: Informe incompleto -> Mitigacion: Reservar Domingo manana solo para informe, no programar.
+ - Riesgo: Git con 1 commit -> Mitigacion: Hacer commit POR CADA feature, push diario, no reescribir historial.
+
+================================================================================
+ COMANDOS GIT UTILES PARA ESTE PROYECTO
+================================================================================
+ git add .
+ git commit -m "feat: descripcion corta"
+ git push origin main
+ git log --oneline --graph --all
+ git log --stat --date=short > historial_commits.txt
+ # Verificar STL prohibido:
+ # En PowerShell: Select-String -Pattern "std::(stack|queue|deque|list|priority_queue)" -Path *.cpp,*.h
+ # Debe dar 0 resultados en archivos de estructuras.
+
+================================================================================
+ CHECKLIST FINAL DE ENTREGA (.zip)
+================================================================================
+ [ ] 1. Codigo fuente completo .h/.cpp por modulo + .zpr + main.cpp
+ [ ] 2. Historial git (.git o historial_commits.txt)
+ [ ] 3. mejores_puntajes.txt generado por programa
+ [ ] 4. Informe PDF max 6 pag
+ [ ] 5. README.md
+ [ ] 6. Carpeta comprimida Proyecto1_[Nombre]_[Cedula].zip
+ [ ] 7. Verificado que compila en ZinjaI limpio
+ [ ] 8. Video/prueba de juego funcionando para defensa
+
+================================================================================
+ NOTA FINAL
+================================================================================
+ Este plan cumple con tu peticion: hoy (Jueves 24) generar las clases.
+ Si sigues el orden, el Domingo tendras margen de 2h antes del cierre.
+ Prioriza estructuras puras hoy; no intentes SFML hasta Viernes.
+ Cualquier duda de implementacion, pide ayuda con el modulo especifico.
+
+  Generado: 2026-09-24
+  Guardado en: PLAN_DESARROLLO_TETRIS.txt
+================================================================================
+
+================================================================================
+ ANOTACIONES Y RECORDATORIOS - OSCAR (Notas personales)
+================================================================================
+1. Eliminar comentarios de Pieza.h y Pieza.cpp (dejar solo codigo visto en clase)
+   - Pieza.h: quitar bloques // ================================================= y comentarios extensos
+   - Pieza.cpp: quitar comentarios visuales de formas (lineas 4-29) y separadores // ====
+   - Mantener solo enum, FORMAS y metodos esenciales para evidenciar autoria (D4)
+2. (pendiente - agregar mas recordatorios aqui)
+================================================================================
