@@ -100,13 +100,15 @@ void Tablero::insertarFilaVaciaAlInicio(){
 	nueva->siguiente = cabeza;
 	cabeza = nueva;
 }
-void Tablero::limpiarLineasCompletas(){
-	
+int Tablero::limpiarLineasCompletas(){
+	int contador = 0;
 	for(int i = 0; i < numFilas; i++){
 		if(esFilaCompleta(i)){
 			eliminarFila(i);
+			contador++;
 		}
 	}
+	return contador;
 	
 }
 bool Tablero::estaOcupada(int fila, int celda){
@@ -138,6 +140,46 @@ Tablero::~Tablero(){
 		Fila* aux = cabeza;
 		cabeza = cabeza->siguiente;
 		delete aux;
+	}
+}
+bool Tablero::puedeColocar(Pieza* p){
+	int posPiezaRotada[4][4];
+	p->getMatriz(posPiezaRotada);
+	for(int i = 0; i < 4; i++){
+		for(int j = 0; j < 4; j++){
+			if(posPiezaRotada[i][j] == 1){
+				int fx = p->getX() + j;
+				int fy = p->getY() + i;
+				if(fx < 0 || fx >= COLUMNAS || fy >= FILAS){
+					return false;
+				}
+				if(estaOcupada(fy, fx)){
+					return false;
+				}
+			}
+		}
+	}
+	return true;	
+}
+
+void Tablero::insertaPieza(Pieza* p){
+	int matriz[4][4];
+	p->getMatriz(matriz);
+	for(int i = 0; i < 4; i++){
+		for(int j = 0; j < 4; j++){
+			int fila = p->getY() + i;
+			int columna = p->getX() + j;
+			setCelda(fila, columna, matriz[i][j]);
+		}
+	}
+}
+void Tablero::limpiarPieza(Pieza* p){
+	for(int i = 0; i < 4; i++){
+		for(int j = 0; j< 4; j++){
+			int fila = p->getY() + i;
+			int columna = p->getX() + j;
+			setCelda(fila,columna,0);
+		}
 	}
 }
 
