@@ -56,6 +56,6 @@ public:
 	bool getHoldHecho();
 	bool getWin();
 	void setNivel(int nivel);
-
+};
 #endif
 
