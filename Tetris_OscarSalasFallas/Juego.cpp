@@ -116,6 +116,7 @@ void Juego::verificarLineas(){
 }
 
 void Juego::intercambiarHold(){
+	if(!holdHecho){
 	tablero.limpiarPieza(actual);
 	if(hold.vacia()){
 		hold.push(actual->getTipo());
@@ -127,6 +128,7 @@ void Juego::intercambiarHold(){
 	delete actual;
 	actual = new Pieza(aux);
 	tablero.insertaPieza(actual);
+	}
 }
 
 void Juego::agregarHistorial(){
