@@ -65,7 +65,7 @@ bool Tablero::esFilaCompleta(int indice){
 	}
 	return completa;
 }
-bool Tablero::eliminarFila(int indice){
+bool Tablero::eliminarFila(int indice){///////////////////////////////////////
 	if(indice >= numFilas){
 		return false;
 	}
@@ -84,7 +84,6 @@ bool Tablero::eliminarFila(int indice){
 	anterior->siguiente = aux->siguiente;
 	aux->siguiente = nullptr;
 	delete aux;
-	insertarFilaVaciaAlInicio();
 	return true;
 }
 void Tablero::insertarFilaVaciaAlInicio(){
@@ -102,7 +101,7 @@ void Tablero::insertarFilaVaciaAlInicio(){
 }
 int Tablero::limpiarLineasCompletas(){
 	int contador = 0;
-	for(int i = 0; i < numFilas; i++){
+	for(int i = 19; i >=0 ; i--){
 		if(esFilaCompleta(i)){
 			eliminarFila(i);
 			contador++;
@@ -169,16 +168,22 @@ void Tablero::insertaPieza(Pieza* p){
 		for(int j = 0; j < 4; j++){
 			int fila = p->getY() + i;
 			int columna = p->getX() + j;
+			if(matriz[i][j] == 1){
 			setCelda(fila, columna, matriz[i][j]);
+			}
 		}
 	}
 }
 void Tablero::limpiarPieza(Pieza* p){
+	int matriz[4][4];
+	p->getMatriz(matriz);
 	for(int i = 0; i < 4; i++){
 		for(int j = 0; j< 4; j++){
 			int fila = p->getY() + i;
 			int columna = p->getX() + j;
-			setCelda(fila,columna,0);
+			if(matriz[i][j] == 1){
+				setCelda(fila,columna,0);
+			}
 		}
 	}
 }

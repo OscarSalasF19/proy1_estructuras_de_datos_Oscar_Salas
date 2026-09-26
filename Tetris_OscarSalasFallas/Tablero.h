@@ -3,12 +3,13 @@
 #include <iostream>
 #include"Pieza.h"
 #include"Constantes.h"
-class Tablero {
-private:
-	struct Fila{
+struct Fila{
 		int celdas[10];
 		Fila* siguiente;
 	};
+class Tablero {
+private:
+	
 	Fila* cabeza;
 	int numFilas = 20;
 public:

@@ -13,6 +13,8 @@ void Replay::agregarEstado(EstadoJuego* e){
 	nuevo->estado.setLineas(e->getLineas());
 	nuevo->estado.setNivel(e->getNivel());
 	nuevo->estado.setPuntaje(e->getPuntaje());
+	nuevo->siguiente = nullptr;
+	nuevo ->anterior = nullptr;
 	if(cabeza == nullptr && cola == nullptr && actual == nullptr){
 		cabeza = nuevo;
 		cola = nuevo;
