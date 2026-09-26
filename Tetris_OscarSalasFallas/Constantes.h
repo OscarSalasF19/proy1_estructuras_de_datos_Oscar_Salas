@@ -26,10 +26,6 @@ const int LINEAS_POR_NIVEL = 10;
 
 const float TIEMPO_ANIM_LINEA_MS = 200.0f;
 
-const int PUNTOS_1_LINEA = 100;
-const int PUNTOS_2_LINEAS = 300;
-const int PUNTOS_3_LINEAS = 500;
-const int PUNTOS_4_LINEAS = 800;
 
 const sf::Color COLOR_FONDO(20, 20, 35);
 const sf::Color COLOR_TABLERO(35, 35, 55);

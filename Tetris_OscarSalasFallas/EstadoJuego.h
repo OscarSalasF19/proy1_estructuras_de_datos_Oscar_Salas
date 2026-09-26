@@ -15,7 +15,7 @@ private:
 
 public:
 	EstadoJuego();
-	EstadoJuego(Tablero t, Pieza p, TipoPieza h, int punt, int lin, int niv);
+	EstadoJuego(Tablero& t, Pieza* p, TipoPieza h, int& punt, int& lin, int& niv);
 
 	Tablero& getTablero();
 	void setTablero(Tablero& t);

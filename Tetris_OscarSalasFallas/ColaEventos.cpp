@@ -27,7 +27,7 @@ ColaEventos::~ColaEventos(){
 			return;
 		}
 		Nodo* aux = cabeza;
-		while(aux->siguiente && aux->siguiente->dato.momentoDisparo < e.momentoDisparo){
+		while(aux->siguiente && aux->siguiente->dato.momentoDisparo <= e.momentoDisparo){
 			aux = aux->siguiente;
 		}
 		nuevo->siguiente = aux->siguiente;

@@ -1,14 +1,17 @@
 #ifndef TABLERO_H
 #define TABLERO_H
 #include <iostream>
-class Tablero {
-private:
-	struct Fila{
-		int celdas[10];
+#include "Pieza.h"
+#include "Constantes.h"
+struct Fila{
+		int celdas[COLUMNAS];
 		Fila* siguiente;
 	};
+class Tablero {
+private:
+	
 	Fila* cabeza;
-	int numFilas = 20;
+	int numFilas = FILAS;
 public:
 	Tablero();
 	void crearTableroVacio();
@@ -18,10 +21,13 @@ public:
 	bool esFilaCompleta(int indice);
 	bool eliminarFila(int indice);
 	void insertarFilaVaciaAlInicio();
-	void limpiarLineasCompletas();
+	int limpiarLineasCompletas();
 	bool estaOcupada(int fila, int celda);
 	void imprimirConsola();
 	~Tablero();
+	bool puedeColocar(Pieza* p);
+	void insertaPieza(Pieza* p);
+	void limpiarPieza(Pieza* p);
 
 };
 

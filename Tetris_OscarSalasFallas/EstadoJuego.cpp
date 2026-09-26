@@ -10,9 +10,11 @@ EstadoJuego::EstadoJuego(){
 	this->nivel = 0;
 }
 
-EstadoJuego::EstadoJuego(Tablero t, Pieza p, TipoPieza h, int punt, int lin, int niv){
+EstadoJuego::EstadoJuego(Tablero& t, Pieza* p, TipoPieza h, int& punt, int& lin, int& niv){
 	this->tablero.copiarDesde(t);
-	this->piezaActual = p;
+	this->piezaActual = Pieza(p->getTipo());
+	piezaActual.setPosicion(p->getX(), p->getY());
+	piezaActual.setRotacion(p->getRotacion());
 	this->hold = h;
 	this->puntaje = punt;
 	this->lineas = lin;
