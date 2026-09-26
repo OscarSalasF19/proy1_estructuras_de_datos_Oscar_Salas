@@ -24,6 +24,7 @@ public:
 	int getTam();
 	bool puedeDeshacer();
 	bool puedeRehacer();
+	EstadoJuego* getEstadoActual();
 	
 };
 

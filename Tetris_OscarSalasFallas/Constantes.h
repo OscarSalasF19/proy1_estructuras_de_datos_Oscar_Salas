@@ -39,11 +39,6 @@ const float TIEMPO_ANIM_LINEA_MS = 200.0f;     // parpadeo al limpiar
 // ============================================================
 // Puntaje (R6 - formula documentada en informe)
 // ============================================================
-// 1 linea = 100 * nivel, 2 = 300 * nivel, 3 = 500 * nivel, 4 (Tetris) = 800 * nivel
-const int PUNTOS_1_LINEA = 100;
-const int PUNTOS_2_LINEAS = 300;
-const int PUNTOS_3_LINEAS = 500;
-const int PUNTOS_4_LINEAS = 800;
 
 // ============================================================
 // Colores por pieza (SFML)

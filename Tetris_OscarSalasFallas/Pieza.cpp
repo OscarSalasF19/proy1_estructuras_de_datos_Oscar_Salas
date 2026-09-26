@@ -89,7 +89,7 @@ Pieza::Pieza(){
 	this->y = 0;
 }
 
-Pieza::Pieza(TipoPieza t) : tipo(t), rotacion(0), x(3), y(0) {
+Pieza::Pieza(TipoPieza t){
 	this->tipo = t;
 	this->rotacion = 0;
 	this->x = 3;
