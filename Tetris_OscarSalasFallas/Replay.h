@@ -16,7 +16,7 @@ private:
 public:
 	Replay();
 	~Replay();
-	void agregarEstado(EstadoJuego& e);
+	void agregarEstado(EstadoJuego* e);
 	void deshacer();
 	void rehacer();
 	void reiniciar();
