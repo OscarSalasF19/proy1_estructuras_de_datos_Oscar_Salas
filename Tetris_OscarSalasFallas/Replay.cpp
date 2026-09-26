@@ -59,6 +59,7 @@ Replay::~Replay(){
 		Nodo* aux = cabeza;
 		cabeza = cabeza->siguiente;
 		delete aux;
+		tam--;
 	}
 }
 
@@ -79,6 +80,13 @@ bool Replay::puedeRehacer(){
 		return true;
 	}
 	return false;
+}
+
+EstadoJuego* Replay::getEstadoActual(){
+	if(actual){
+		return &(actual->estado);
+	}
+	return nullptr;
 }
 
 void Replay::eliminarEstados(Nodo* limite){

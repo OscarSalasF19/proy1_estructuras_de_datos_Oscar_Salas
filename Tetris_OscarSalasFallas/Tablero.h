@@ -1,17 +1,17 @@
 #ifndef TABLERO_H
 #define TABLERO_H
 #include <iostream>
-#include"Pieza.h"
-#include"Constantes.h"
+#include "Pieza.h"
+#include "Constantes.h"
 struct Fila{
-		int celdas[10];
+		int celdas[COLUMNAS];
 		Fila* siguiente;
 	};
 class Tablero {
 private:
 	
 	Fila* cabeza;
-	int numFilas = 20;
+	int numFilas = FILAS;
 public:
 	Tablero();
 	void crearTableroVacio();

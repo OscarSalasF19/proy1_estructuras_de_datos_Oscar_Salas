@@ -65,7 +65,7 @@ bool Tablero::esFilaCompleta(int indice){
 	}
 	return completa;
 }
-bool Tablero::eliminarFila(int indice){///////////////////////////////////////
+bool Tablero::eliminarFila(int indice){
 	if(indice >= numFilas){
 		return false;
 	}
@@ -74,6 +74,7 @@ bool Tablero::eliminarFila(int indice){///////////////////////////////////////
 	if(indice == 0){
 		cabeza = cabeza->siguiente;
 		delete aux;
+		insertarFilaVaciaAlInicio();
 		return true;
 	}
 	for(int i = 0; i < indice; i ++){
@@ -84,6 +85,7 @@ bool Tablero::eliminarFila(int indice){///////////////////////////////////////
 	anterior->siguiente = aux->siguiente;
 	aux->siguiente = nullptr;
 	delete aux;
+	insertarFilaVaciaAlInicio();
 	return true;
 }
 void Tablero::insertarFilaVaciaAlInicio(){
@@ -101,10 +103,11 @@ void Tablero::insertarFilaVaciaAlInicio(){
 }
 int Tablero::limpiarLineasCompletas(){
 	int contador = 0;
-	for(int i = 19; i >=0 ; i--){
+	for(int i = 0; i < FILAS ; i++){
 		if(esFilaCompleta(i)){
 			eliminarFila(i);
 			contador++;
+			i--;
 		}
 	}
 	return contador;

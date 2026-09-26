@@ -22,9 +22,11 @@ private:
 	bool gameOver;
 	Replay historial;
 	bool holdHecho;
+	bool win;
 	
 public:
 	Juego();
+	~Juego();
 	void iniciar();
 	void spawnPieza();
 	void moverIzquierda();
@@ -37,9 +39,23 @@ public:
 	void verificarLineas();
 	void intercambiarHold();
 	void agregarHistorial();
-	
+	void deshacer();
+	void rehacer();
 
-};
+	Tablero& getTablero();
+	ColaPiezas& getCola();
+	PilaHold& getHold();
+	Pieza* getActual();
+	Pieza* getSiguiente();
+	int getPuntaje();
+	int getLineas();
+	int getNivel();
+	float getTiempoCaida();
+	bool getGameOver();
+	Replay& getHistorial();
+	bool getHoldHecho();
+	bool getWin();
+	void setNivel(int nivel);
 
 #endif
 
