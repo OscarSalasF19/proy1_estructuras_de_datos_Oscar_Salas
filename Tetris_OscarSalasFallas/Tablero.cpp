@@ -20,9 +20,16 @@ void Tablero::copiarDesde(Tablero& origen){
 }
 
 void Tablero::crearTableroVacio(){
-	for(int i = 0; i < numFilas; i++){
-		insertarFilaVaciaAlInicio();
+	if(!cabeza){
+		for(int i = 0; i < numFilas; i++){
+			insertarFilaVaciaAlInicio();
+		}	
+	}else{
+		for(int i = 0; i < numFilas; i++){
+			eliminarFila(i);
+		}	
 	}
+	
 }
 int Tablero::getCelda(int indice, int celda){
 	Fila* aux = cabeza;

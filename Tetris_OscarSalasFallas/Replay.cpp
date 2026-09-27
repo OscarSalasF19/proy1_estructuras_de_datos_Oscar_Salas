@@ -53,6 +53,7 @@ void Replay::reiniciar(){
 	actual = nullptr;
 	EstadoJuego* nuevo = new EstadoJuego();
 	agregarEstado(nuevo);
+	delete nuevo;
 }
 Replay::~Replay(){
 	while(cabeza){

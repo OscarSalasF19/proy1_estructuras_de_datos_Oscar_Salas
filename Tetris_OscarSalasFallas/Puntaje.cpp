@@ -5,6 +5,10 @@ Puntaje::Puntaje() {
 	historico = nullptr;
 }
 
+Puntaje::~Puntaje() {
+	delete[] historico;
+}
+
 void Puntaje::insertarPuntaje(int puntos, string jugador, string fecha){
 	int tamAnterior = tam;
 	this->tam++;

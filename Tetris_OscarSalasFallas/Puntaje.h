@@ -14,6 +14,7 @@ private:
 	int tam;
 public:
 	Puntaje();
+	~Puntaje();
 	void insertarPuntaje(int puntos, string jugador, string fecha);
 	void selectionSort();
 	void mergeSort(int inicio, int final);

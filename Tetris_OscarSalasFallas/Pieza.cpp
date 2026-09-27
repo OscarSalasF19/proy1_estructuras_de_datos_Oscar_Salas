@@ -1,5 +1,4 @@
 #include "Pieza.h"
-
 const int FORMAS[7][4][4][4] = {
     {
         {{0,0,0,0},{1,1,1,1},{0,0,0,0},{0,0,0,0}},
@@ -32,16 +31,16 @@ const int FORMAS[7][4][4][4] = {
         {{0,0,1,0},{0,1,1,0},{0,1,0,0},{0,0,0,0}}
     },
     {
-        {{1,0,0,0},{1,1,1,0},{0,0,0,0},{0,0,0,0}},
+        {{1,0,0,0},{1,1,1,0},{0,0,0,0},{0,0,0,0}}, 
         {{0,1,1,0},{0,1,0,0},{0,1,0,0},{0,0,0,0}},
         {{0,0,0,0},{1,1,1,0},{0,0,1,0},{0,0,0,0}},
-        {{0,1,0,0},{0,1,0,0},{1,1,0,0},{0,0,0,0}}
+        {{0,1,0,0},{0,1,0,0},{1,1,0,0},{0,0,0,0}} 
     },
     {
         {{0,0,1,0},{1,1,1,0},{0,0,0,0},{0,0,0,0}},
         {{0,1,0,0},{0,1,0,0},{0,1,1,0},{0,0,0,0}},
         {{0,0,0,0},{1,1,1,0},{1,0,0,0},{0,0,0,0}},
-        {{1,1,0,0},{0,1,0,0},{0,1,0,0},{0,0,0,0}}
+        {{1,1,0,0},{0,1,0,0},{0,1,0,0},{0,0,0,0}} 
     }
 };
 
@@ -67,21 +66,21 @@ Pieza::Pieza(TipoPieza t, int rot, int px, int py){
     if (rotacion < 0) rotacion += 4;
 }
 
-TipoPieza Pieza::getTipo(){
-	return tipo;
+TipoPieza Pieza::getTipo(){ 
+	return tipo; 
 }
-int Pieza::getRotacion(){
-	return rotacion;
+int Pieza::getRotacion(){ 
+	return rotacion; 
 }
-int Pieza::getX(){
-	return x;
+int Pieza::getX(){ 
+	return x; 
 }
-int Pieza::getY(){
-	return y;
+int Pieza::getY(){ 
+	return y; 
 }
 
-bool Pieza::esVacia(){
-	return tipo == NINGUNA;
+bool Pieza::esVacia(){ 
+	return tipo == NINGUNA; 
 }
 
 sf::Color Pieza::getColorPorTipo(TipoPieza t) {
@@ -102,23 +101,24 @@ sf::Color Pieza::getColor(){
 }
 
 void Pieza::setPosicion(int px, int py){
-	x = px;
-	y = py;
+	x = px; 
+	y = py; 
 }
-void Pieza::mover(int dx, int dy){
+void Pieza::mover(int dx, int dy){ 
 	x += dx;
-	y += dy;
+	y += dy; 
 }
 void Pieza::setRotacion(int r) {
     rotacion = r % 4;
     if (rotacion < 0) rotacion += 4;
 }
-void Pieza::rotarHorario() {
-	rotacion = (rotacion + 1) % 4;
+void Pieza::rotarHorario() { 
+	rotacion = (rotacion + 1) % 4; 
 }
-void Pieza::rotarAntiHorario() {
-	rotacion = (rotacion + 3) % 4;
+void Pieza::rotarAntiHorario() { 
+	rotacion = (rotacion + 3) % 4; 
 }
+
 
 void Pieza::getMatriz(int out[4][4]){
     getMatrizRot(rotacion, out);

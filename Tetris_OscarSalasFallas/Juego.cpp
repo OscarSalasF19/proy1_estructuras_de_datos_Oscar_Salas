@@ -109,6 +109,7 @@ void Juego::bajar(){
 	
 }
 void Juego::hardDrop(){
+	tablero.limpiarPieza(actual);
 	Pieza aux = *actual;
 	while(tablero.puedeColocar(&aux)){
 		*actual = aux;
@@ -151,6 +152,7 @@ void Juego::intercambiarHold(){
 	actual = new Pieza(aux);
 	tablero.insertaPieza(actual);
 	agregarHistorial();
+	holdHecho = true;
 	}
 }
 
