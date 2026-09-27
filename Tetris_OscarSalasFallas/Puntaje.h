@@ -20,7 +20,10 @@ public:
 	void mergeSort(int inicio, int final);
 	void merge(int inicio, int medio, int final);
 	void iniciarMergeSort();
-
+	string getNombre(int indice);
+	int getPuntos(int indice);
+	string getFecha(int indice);
+	int getTam();
 };
 #endif
 

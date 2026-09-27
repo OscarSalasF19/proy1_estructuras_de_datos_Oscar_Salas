@@ -5,16 +5,21 @@ EstadoJuego::EstadoJuego(){
 	tablero.crearTableroVacio();
 	this->hold = NINGUNA;
 	this->piezaActual = NINGUNA;
+	this->siguientePieza = NINGUNA;
 	this->puntaje = 0;
 	this->lineas = 0;
 	this->nivel = 0;
 }
 
-EstadoJuego::EstadoJuego(Tablero& t, Pieza* p, TipoPieza h, int& punt, int& lin, int& niv){
+EstadoJuego::EstadoJuego(Tablero& t, Pieza* p, Pieza* siguientePieza, ColaPiezas& bolsa, TipoPieza h, int& punt, int& lin, int& niv){
 	this->tablero.copiarDesde(t);
 	this->piezaActual = Pieza(p->getTipo());
-	piezaActual.setPosicion(p->getX(), p->getY());
-	piezaActual.setRotacion(p->getRotacion());
+	this->piezaActual.setPosicion(p->getX(), p->getY());
+	this->piezaActual.setRotacion(p->getRotacion());
+	this->siguientePieza = Pieza(siguientePieza->getTipo());
+	this->siguientePieza.setPosicion(siguientePieza->getX(), siguientePieza->getY());
+	this->siguientePieza.setRotacion(siguientePieza->getRotacion());
+	this->bolsaActual.copiarDesde(bolsa);
 	this->hold = h;
 	this->puntaje = punt;
 	this->lineas = lin;
@@ -35,6 +40,30 @@ Pieza EstadoJuego::getPiezaActual(){
 
 void EstadoJuego::setPiezaActual(Pieza p){
 	this->piezaActual = p;
+}
+
+Pieza EstadoJuego::getSiguientePieza(){
+	return siguientePieza;
+}
+
+void EstadoJuego::setSiguientePieza(Pieza p){
+	this->siguientePieza = p;
+}
+
+Pieza EstadoJuego::getSiguiente(){
+	return siguientePieza;
+}
+
+void EstadoJuego::setSiguiente(Pieza p){
+	this->siguientePieza = p;
+}
+
+ColaPiezas& EstadoJuego::getBolsaActual(){
+	return bolsaActual;
+}
+
+void EstadoJuego::setBolsaActual(ColaPiezas& bolsa){
+	this->bolsaActual.copiarDesde(bolsa);
 }
 
 TipoPieza EstadoJuego::getHold(){

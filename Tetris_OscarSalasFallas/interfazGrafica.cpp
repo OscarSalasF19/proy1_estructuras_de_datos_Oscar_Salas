@@ -1,6 +1,14 @@
 #include "interfazGrafica.h"
 #include "Constantes.h"
+#include "Puntaje.h"
+#include <iostream>
 #include <string>
+#include <fstream>
+#include <vector>
+#include <algorithm>
+#include <ctime>
+#include <cmath>
+using namespace std;
 
 interfazGrafica::interfazGrafica() {
 	fuenteOK = false;
@@ -8,205 +16,831 @@ interfazGrafica::interfazGrafica() {
 }
 
 bool interfazGrafica::cargarFuente() {
-	if (fuente.loadFromFile("resources/fonts/batmfa__.ttf")) return true;
-	if (fuente.loadFromFile("./resources/fonts/batmfa__.ttf")) return true;
-	if (fuente.loadFromFile("../resources/fonts/batmfa__.ttf")) return true;
-	if (fuente.loadFromFile("Tetris_OscarSalasFallas/resources/fonts/batmfa__.ttf")) return true;
-	if (fuente.loadFromFile("resources/fonts/batmfo__.ttf")) return true;
-	if (fuente.loadFromFile("./resources/fonts/batmfo__.ttf")) return true;
-	if (fuente.loadFromFile("../resources/fonts/batmfo__.ttf")) return true;
-	if (fuente.loadFromFile("arial.ttf")) return true;
-	if (fuente.loadFromFile("C:/Windows/Fonts/arial.ttf")) return true;
+	if (fuente.loadFromFile("resources/fonts/batmfa__.ttf")){
+		return true;
+	}
 	return false;
 }
 
 bool interfazGrafica::cargarFondo() {
-	const char* rutas[] = {
-		"resources/images/background.jpg",
-		"./resources/images/background.jpg",
-		"../resources/images/background.jpg",
-		"Tetris_OscarSalasFallas/resources/images/background.jpg"
-	};
-	for (int i = 0; i < 4; i++) {
-		if (texFondo.loadFromFile(rutas[i])) {
-			texFondo.setSmooth(true);
-			sf::Vector2u t = texFondo.getSize();
-			if (t.x > 0 && t.y > 0) {
-				sprFondo.setTexture(texFondo);
-				sprFondo.setScale((float)ANCHO_VENTANA / (float)t.x,
-				                  (float)ALTO_VENTANA / (float)t.y);
-			}
-			return true;
+	if (texFondo.loadFromFile("resources/images/background.jpg")) {
+	texFondo.setSmooth(true);
+	sf::Vector2u dimensionesTextura = texFondo.getSize();
+	if (dimensionesTextura.x > 0 && dimensionesTextura.y > 0) {
+		sprFondo.setTexture(texFondo);
+		sprFondo.setScale((float)ANCHO_VENTANA / (float)dimensionesTextura.x,
+			(float)ALTO_VENTANA / (float)dimensionesTextura.y);
 		}
+		return true;
 	}
 	return false;
 }
 
 void interfazGrafica::dibujarFondo() {
-	if (!fondoOK) return;
+	if (!fondoOK){
+		return;
+	}
 	ventana.draw(sprFondo);
-	sf::RectangleShape velo(sf::Vector2f((float)ANCHO_VENTANA, (float)ALTO_VENTANA));
-	velo.setPosition(0, 0);
-	velo.setFillColor(sf::Color(5, 8, 16, 130));
-	ventana.draw(velo);
 }
 
 void interfazGrafica::dibujarCelda(int fila, int col, sf::Color color) {
-	float x = (float)(ORIGEN_TABLERO_X + col * TAM_CELDA);
-	float y = (float)(ORIGEN_TABLERO_Y + fila * TAM_CELDA);
-	sf::RectangleShape base(sf::Vector2f((float)TAM_CELDA - 1, (float)TAM_CELDA - 1));
-	base.setPosition(x + 1, y + 1);
-	base.setFillColor(color);
-	base.setOutlineColor(COLOR_BORDE_CELDA);
-	base.setOutlineThickness(1);
-	ventana.draw(base);
+	float posX = (float)(ORIGEN_TABLERO_X + col * TAM_CELDA);
+	float posY = (float)(ORIGEN_TABLERO_Y + fila * TAM_CELDA);
+	sf::RectangleShape bloque(sf::Vector2f((float)TAM_CELDA - 1, (float)TAM_CELDA - 1));
+	bloque.setPosition(posX + 1, posY + 1);
+	bloque.setFillColor(color);
+	bloque.setOutlineColor(COLOR_BORDE_CELDA);
+	bloque.setOutlineThickness(1);
+	ventana.draw(bloque);
 }
 
 void interfazGrafica::dibujarTablero(Juego& juego) {
-	sf::RectangleShape marco(sf::Vector2f((float)ANCHO_TABLERO_PX + 4, (float)ALTO_TABLERO_PX + 4));
-	marco.setPosition((float)ORIGEN_TABLERO_X - 2, (float)ORIGEN_TABLERO_Y - 2);
-	marco.setFillColor(sf::Color::Transparent);
-	marco.setOutlineColor(COLOR_MARCO_NEON);
-	marco.setOutlineThickness(2);
-	ventana.draw(marco);
+	sf::RectangleShape marcoNeon(sf::Vector2f((float)ANCHO_TABLERO_PX + 4, (float)ALTO_TABLERO_PX + 4));
+	marcoNeon.setPosition((float)ORIGEN_TABLERO_X - 2, (float)ORIGEN_TABLERO_Y - 2);
+	marcoNeon.setFillColor(sf::Color::Transparent);
+	marcoNeon.setOutlineColor(COLOR_MARCO_NEON);
+	marcoNeon.setOutlineThickness(2);
+	ventana.draw(marcoNeon);
 
-	sf::RectangleShape fondo(sf::Vector2f((float)ANCHO_TABLERO_PX, (float)ALTO_TABLERO_PX));
-	fondo.setPosition((float)ORIGEN_TABLERO_X, (float)ORIGEN_TABLERO_Y);
-	fondo.setFillColor(COLOR_TABLERO);
-	ventana.draw(fondo);
+	sf::RectangleShape fondoTablero(sf::Vector2f((float)ANCHO_TABLERO_PX, (float)ALTO_TABLERO_PX));
+	fondoTablero.setPosition((float)ORIGEN_TABLERO_X, (float)ORIGEN_TABLERO_Y);
+	fondoTablero.setFillColor(COLOR_TABLERO);
+	ventana.draw(fondoTablero);
 
-	Tablero& t = juego.getTablero();
-	for (int f = 0; f < FILAS; f++) {
-		for (int c = 0; c < COLUMNAS; c++) {
-			int v = t.getCelda(f, c);
-			if (v == 1) {
-				dibujarCelda(f, c, COLOR_FIJA);
+	Tablero& tablero = juego.getTablero();
+	for (int fila = 0; fila < FILAS; fila++) {
+		for (int columna = 0; columna < COLUMNAS; columna++) {
+			int valorCelda = tablero.getCelda(fila, columna);
+			if (valorCelda == 1) {
+				dibujarCelda(fila, columna, COLOR_FIJA);
 			} else {
-				
-				sf::RectangleShape g(sf::Vector2f((float)TAM_CELDA - 1, (float)TAM_CELDA - 1));
-				g.setPosition((float)(ORIGEN_TABLERO_X + c * TAM_CELDA + 1),
-				              (float)(ORIGEN_TABLERO_Y + f * TAM_CELDA + 1));
-				g.setFillColor(sf::Color::Transparent);
-				g.setOutlineColor(COLOR_REJILLA);
-				g.setOutlineThickness(1);
-				ventana.draw(g);
+				sf::RectangleShape celdaVacia(sf::Vector2f((float)TAM_CELDA - 1, (float)TAM_CELDA - 1));
+				celdaVacia.setPosition((float)(ORIGEN_TABLERO_X + columna * TAM_CELDA + 1),
+				                       (float)(ORIGEN_TABLERO_Y + fila * TAM_CELDA + 1));
+				celdaVacia.setFillColor(sf::Color::Transparent);
+				celdaVacia.setOutlineColor(COLOR_REJILLA);
+				celdaVacia.setOutlineThickness(1);
+				ventana.draw(celdaVacia);
 			}
 		}
 	}
 }
 
 void interfazGrafica::dibujarPiezaActual(Juego& juego) {
-	Pieza* p = juego.getActual();
-	if (!p) return;
-	if (p->esVacia()) return;
-	int mat[4][4];
-	p->getMatriz(mat);
-	sf::Color col = Pieza::getColorPorTipo(p->getTipo());
+	Pieza* piezaActual = juego.getActual();
+	if (!piezaActual){
+		return;
+	}
+	if (piezaActual->esVacia()){
+		return;
+	}
+	int matrizPieza[4][4];
+	piezaActual->getMatriz(matrizPieza);
+	sf::Color colorPieza = Pieza::getColorPorTipo(piezaActual->getTipo());
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
-			if (mat[i][j] == 1) {
-				int fy = p->getY() + i;
-				int fx = p->getX() + j;
-				if (fy < 0 || fy >= FILAS || fx < 0 || fx >= COLUMNAS) continue;
-				dibujarCelda(fy, fx, col);
+			if (matrizPieza[i][j] == 1) {
+				int filaTablero = piezaActual->getY() + i;
+				int columnaTablero = piezaActual->getX() + j;
+				if (filaTablero < 0 || filaTablero >= FILAS || columnaTablero < 0 || columnaTablero >= COLUMNAS) continue;
+				dibujarCelda(filaTablero, columnaTablero, colorPieza);
 			}
 		}
 	}
 }
 
-void interfazGrafica::dibujarMiniPieza(TipoPieza tipo, float x, float y, float tam) {
-	if (tipo == NINGUNA) return;
-	int mat[4][4];
-	Pieza tmp(tipo);
-	tmp.getMatriz(mat);
-	sf::Color col = Pieza::getColorPorTipo(tipo);
+void interfazGrafica::dibujarMiniPieza(TipoPieza tipo, float origenX, float origenY, float tamBloque) {
+	if (tipo == NINGUNA){
+		return;
+	}
+	int matrizMini[4][4];
+	Pieza piezaTemporal(tipo);
+	piezaTemporal.getMatriz(matrizMini);
+	sf::Color colorMini = Pieza::getColorPorTipo(tipo);
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
-			if (mat[i][j] == 1) {
-				sf::RectangleShape r(sf::Vector2f(tam - 1, tam - 1));
-				r.setPosition(x + j * tam + 1, y + i * tam + 1);
-				r.setFillColor(col);
-				r.setOutlineColor(COLOR_BORDE_CELDA);
-				r.setOutlineThickness(1);
-				ventana.draw(r);
+			if (matrizMini[i][j] == 1) {
+				sf::RectangleShape bloqueMini(sf::Vector2f(tamBloque - 1, tamBloque - 1));
+				bloqueMini.setPosition(origenX + j * tamBloque + 1, origenY + i * tamBloque + 1);
+				bloqueMini.setFillColor(colorMini);
+				bloqueMini.setOutlineColor(COLOR_BORDE_CELDA);
+				bloqueMini.setOutlineThickness(1);
+				ventana.draw(bloqueMini);
 			}
 		}
 	}
 }
 
-void interfazGrafica::dibujarTexto(const std::string& str, float x, float y, unsigned tam) {
-	if (!fuenteOK) return;
-	sf::Text t;
-	t.setFont(fuente);
-	t.setString(str);
-	t.setCharacterSize(tam);
-	t.setFillColor(tam >= 20 ? COLOR_TITULO : COLOR_TEXTO);
-	t.setPosition(x, y);
-	ventana.draw(t);
+void interfazGrafica::dibujarTexto(string contenido, float posX, float posY, unsigned tamLetra) {
+	if (!fuenteOK){
+		return;
+	}
+	sf::Text texto;
+	texto.setFont(fuente);
+	texto.setString(contenido);
+	texto.setCharacterSize(tamLetra);
+	texto.setFillColor(tamLetra >= 20 ? COLOR_TITULO : COLOR_TEXTO);
+	texto.setPosition(posX, posY);
+	ventana.draw(texto);
+}
+
+void interfazGrafica::dibujarTextoC(string contenido, float centroX, float posY, unsigned tamLetra) {
+	if (!fuenteOK){
+		return;
+	}
+	sf::Text textoCentrado;
+	textoCentrado.setFont(fuente);
+	textoCentrado.setString(contenido);
+	textoCentrado.setCharacterSize(tamLetra);
+	textoCentrado.setFillColor(tamLetra >= 32 ? COLOR_TITULO : COLOR_TEXTO);
+	sf::FloatRect limites = textoCentrado.getLocalBounds();
+	textoCentrado.setPosition(centroX - (limites.left + limites.width / 2), posY);
+	ventana.draw(textoCentrado);
+}
+
+void interfazGrafica::dibujarBoton(float posX, float posY, float ancho, float alto, string etiqueta, unsigned tamLetra) {
+	sf::Vector2i posicionMouseActual = sf::Mouse::getPosition(ventana);
+	bool estaSobre = sobreBoton(posX, posY, ancho, alto, posicionMouseActual);
+	sf::RectangleShape marcoBoton(sf::Vector2f(ancho, alto));
+	marcoBoton.setPosition(posX, posY);
+	marcoBoton.setFillColor(estaSobre ? sf::Color(0, 60, 90) : sf::Color(8, 20, 38, 220));
+	marcoBoton.setOutlineColor(COLOR_MARCO_NEON);
+	marcoBoton.setOutlineThickness(2);
+	ventana.draw(marcoBoton);
+	if (!fuenteOK){
+		return;
+	}
+	sf::Text textoBoton;
+	textoBoton.setFont(fuente);
+	textoBoton.setString(etiqueta);
+	textoBoton.setCharacterSize(tamLetra);
+	textoBoton.setFillColor(COLOR_TEXTO);
+	sf::FloatRect limitesEtiqueta = textoBoton.getLocalBounds();
+	textoBoton.setPosition(posX + (ancho - limitesEtiqueta.width) / 2.0f - limitesEtiqueta.left,
+	                       posY + (alto - limitesEtiqueta.height) / 2.0f - limitesEtiqueta.top);
+	ventana.draw(textoBoton);
+}
+
+bool interfazGrafica::sobreBoton(float posX, float posY, float ancho, float alto, sf::Vector2i puntoClic) {
+	return puntoClic.x >= posX && puntoClic.x <= posX + ancho && puntoClic.y >= posY && puntoClic.y <= posY + alto;
+}
+
+int interfazGrafica::mostrarMenu() {
+	abrirVentana("TETRIS TRON");
+	float centroX = (float)ANCHO_VENTANA / 2;
+	float anchoBoton = 340, altoBoton = 62;
+	float botonX = centroX - anchoBoton / 2;
+	while (ventana.isOpen()) {
+		sf::Event evento;
+		while (ventana.pollEvent(evento)) {
+			if (evento.type == sf::Event::Closed){
+				return 0;
+			}
+			if (evento.type == sf::Event::MouseButtonPressed && evento.mouseButton.button == sf::Mouse::Left) {
+				sf::Vector2i puntoClic(evento.mouseButton.x, evento.mouseButton.y);
+				if (sobreBoton(botonX, 360, anchoBoton, altoBoton, puntoClic)){
+					return 1;
+				}
+				if (sobreBoton(botonX, 440, anchoBoton, altoBoton, puntoClic)) {
+					 mostrarEstadisticas(); 
+					 abrirVentana("TETRIS TRON"); 
+				}
+				if (sobreBoton(botonX, 520, anchoBoton, altoBoton, puntoClic)) {
+					return 0;
+				}
+			}
+		}
+		ventana.clear(COLOR_FONDO);
+		dibujarFondo();
+		dibujarTextoC("TETRIS TRON", centroX, 150, 64);
+		dibujarBoton(botonX, 360, anchoBoton, altoBoton, "JUGAR");
+		dibujarBoton(botonX, 440, anchoBoton, altoBoton, "ESTADISTICA");
+		dibujarBoton(botonX, 520, anchoBoton, altoBoton, "SALIR");
+		ventana.display();
+	}
+	return 0;
+}
+
+void interfazGrafica::guardarPuntaje(int puntos) {
+	time_t marcaTiempo = time(0);
+	char fechaTexto[16] = "sin-fecha";
+	if (marcaTiempo != (time_t)-1) {
+		tm* infoFecha = localtime(&marcaTiempo);
+		if (infoFecha) strftime(fechaTexto, sizeof(fechaTexto), "%d-%m-%Y", infoFecha);
+	}
+	ofstream archivoSalida(ARCHIVO_PUNTAJES, ios::app);
+	if (archivoSalida){
+		archivoSalida << puntos << "|JUGADOR|" << fechaTexto << "\n";
+	}
+}
+
+void interfazGrafica::mostrarEstadisticas() {
+	float centroX = (float)ANCHO_VENTANA / 2.0f;
+	float anchoBoton = 360.0f;
+	float altoBoton = 60.0f;
+	float botonX = centroX - anchoBoton / 2.0f;
+
+	while (ventana.isOpen()) {
+		// --- FASE 1: SELECCIONAR METODO DE ORDENAMIENTO ---
+		abrirVentana("TETRIS TRON - METODO DE ORDENAMIENTO");
+		string metodoElegido = "";
+
+		while (ventana.isOpen() && metodoElegido.empty()) {
+			sf::Event evento;
+			while (ventana.pollEvent(evento)) {
+				if (evento.type == sf::Event::Closed) {
+					return;
+				}
+				if (evento.type == sf::Event::MouseButtonPressed && evento.mouseButton.button == sf::Mouse::Left) {
+					sf::Vector2i puntoClic(evento.mouseButton.x, evento.mouseButton.y);
+					if (sobreBoton(botonX, 350.0f, anchoBoton, altoBoton, puntoClic)) {
+						metodoElegido = "SELECTION SORT";
+					}
+					if (sobreBoton(botonX, 440.0f, anchoBoton, altoBoton, puntoClic)) {
+						metodoElegido = "MERGE SORT";
+					}
+					if (sobreBoton(botonX, 550.0f, anchoBoton, altoBoton, puntoClic)) {
+						return;
+					}
+				}
+			}
+
+			ventana.clear(COLOR_FONDO);
+			dibujarFondo();
+			dibujarTextoC("ESTADISTICAS", centroX, 130.0f, 52);
+			dibujarTextoC("SELECCIONE EL METODO DE ORDENAMIENTO:", centroX, 250.0f, 22);
+
+			dibujarBoton(botonX, 350.0f, anchoBoton, altoBoton, "SELECTION SORT", 20);
+			dibujarBoton(botonX, 440.0f, anchoBoton, altoBoton, "MERGE SORT", 20);
+			dibujarBoton(botonX, 550.0f, anchoBoton, altoBoton, "VOLVER", 20);
+
+			ventana.display();
+		}
+
+		if (metodoElegido.empty()) {
+			return;
+		}
+
+		// --- CARGAR Y ORDENAR PUNTAJES SEGUN EL METODO ELEGIDO ---
+		Puntaje tablaPuntajes;
+		ifstream archivoEntrada(ARCHIVO_PUNTAJES);
+		if (archivoEntrada) {
+			string lineaRegistro;
+			while (getline(archivoEntrada, lineaRegistro)) {
+				if (lineaRegistro.empty()) continue;
+				int posSeparador1 = (int)lineaRegistro.find('|');
+				int posSeparador2 = (int)lineaRegistro.find('|', posSeparador1 + 1);
+				if (posSeparador1 < 0 || posSeparador2 < 0) continue;
+				string textoPuntos = lineaRegistro.substr(0, posSeparador1);
+				string nombreJugador = lineaRegistro.substr(posSeparador1 + 1, posSeparador2 - posSeparador1 - 1);
+				string fechaRegistro = lineaRegistro.substr(posSeparador2 + 1);
+				int valorPuntos = 0;
+				try {
+					valorPuntos = stoi(textoPuntos);
+				} catch (...) {
+					continue;
+				}
+				tablaPuntajes.insertarPuntaje(valorPuntos, nombreJugador, fechaRegistro);
+			}
+		}
+
+		if (metodoElegido == "SELECTION SORT") {
+			tablaPuntajes.selectionSort();
+		} else {
+			tablaPuntajes.iniciarMergeSort();
+		}
+
+		// --- FASE 2: MOSTRAR TABLA DE ESTADISTICAS CON ENCABEZADOS ---
+		abrirVentana("TETRIS TRON - TOP 10 (" + metodoElegido + ")");
+		bool volverASeleccion = false;
+
+		float anchoCuadro = 760.0f;
+		float altoCuadro = 520.0f;
+		float cuadroX = centroX - anchoCuadro / 2.0f;
+		float cuadroY = 160.0f;
+		float altoHeader = 46.0f;
+
+		while (ventana.isOpen() && !volverASeleccion) {
+			sf::Event evento;
+			while (ventana.pollEvent(evento)) {
+				if (evento.type == sf::Event::Closed) {
+					return;
+				}
+				if (evento.type == sf::Event::MouseButtonPressed && evento.mouseButton.button == sf::Mouse::Left) {
+					sf::Vector2i puntoClic(evento.mouseButton.x, evento.mouseButton.y);
+					// Boton para cambiar metodo de ordenamiento
+					if (sobreBoton(centroX - 285.0f, 715.0f, 270.0f, 54.0f, puntoClic)) {
+						volverASeleccion = true;
+					}
+					// Boton para volver al menu principal
+					if (sobreBoton(centroX + 15.0f, 715.0f, 270.0f, 54.0f, puntoClic)) {
+						return;
+					}
+				}
+			}
+
+			ventana.clear(COLOR_FONDO);
+			dibujarFondo();
+
+			// Titulo y Subtitulo indicando el metodo utilizado
+			dibujarTextoC("TOP 10 MEJORES PUNTAJES", centroX, 60.0f, 40);
+			dibujarTextoC("ORDENADO POR: " + metodoElegido, centroX, 115.0f, 20);
+
+			// Marco exterior del cuadro de estadisticas
+			sf::RectangleShape marcoCuadro(sf::Vector2f(anchoCuadro, altoCuadro));
+			marcoCuadro.setPosition(cuadroX, cuadroY);
+			marcoCuadro.setFillColor(sf::Color(8, 20, 38, 230));
+			marcoCuadro.setOutlineColor(COLOR_MARCO_NEON);
+			marcoCuadro.setOutlineThickness(2.0f);
+			ventana.draw(marcoCuadro);
+
+			// Barra superior para los encabezados
+			sf::RectangleShape barraHeader(sf::Vector2f(anchoCuadro, altoHeader));
+			barraHeader.setPosition(cuadroX, cuadroY);
+			barraHeader.setFillColor(sf::Color(0, 60, 90, 220));
+			ventana.draw(barraHeader);
+
+			// Linea divisoria neon debajo de los encabezados
+			sf::RectangleShape lineaSeparador(sf::Vector2f(anchoCuadro, 2.0f));
+			lineaSeparador.setPosition(cuadroX, cuadroY + altoHeader);
+			lineaSeparador.setFillColor(COLOR_MARCO_NEON);
+			ventana.draw(lineaSeparador);
+
+			// Encabezados de columna
+			float headerTextoY = cuadroY + 12.0f;
+			dibujarTexto("POS", cuadroX + 35.0f, headerTextoY, 20);
+			dibujarTexto("JUGADOR", cuadroX + 150.0f, headerTextoY, 20);
+			dibujarTexto("PUNTAJE", cuadroX + 410.0f, headerTextoY, 20);
+			dibujarTexto("FECHA", cuadroX + 600.0f, headerTextoY, 20);
+
+			// Registros de la tabla
+			int cantidadRegistros = tablaPuntajes.getTam();
+			if (cantidadRegistros == 0) {
+				dibujarTextoC("NO HAY REGISTROS DE PUNTAJE", centroX, cuadroY + 220.0f, 22);
+			} else {
+				int topeMostrado = cantidadRegistros < TOP_PUNTAJES ? cantidadRegistros : TOP_PUNTAJES;
+				float altoFila = 44.0f;
+				for (int i = 0; i < topeMostrado; i++) {
+					float filaY = cuadroY + altoHeader + 4.0f + (float)i * altoFila;
+
+					// Sombreado alterno en filas impares
+					if (i % 2 == 1) {
+						sf::RectangleShape filaSombra(sf::Vector2f(anchoCuadro - 6.0f, altoFila - 2.0f));
+						filaSombra.setPosition(cuadroX + 3.0f, filaY);
+						filaSombra.setFillColor(sf::Color(15, 35, 60, 110));
+						ventana.draw(filaSombra);
+					}
+
+					string posStr = to_string(i + 1);
+					string jugadorStr = tablaPuntajes.getNombre(i);
+					string puntosStr = to_string(tablaPuntajes.getPuntos(i));
+					string fechaStr = tablaPuntajes.getFecha(i);
+
+					dibujarTexto(posStr, cuadroX + 42.0f, filaY + 10.0f, 18);
+					dibujarTexto(jugadorStr, cuadroX + 150.0f, filaY + 10.0f, 18);
+					dibujarTexto(puntosStr, cuadroX + 410.0f, filaY + 10.0f, 18);
+					dibujarTexto(fechaStr, cuadroX + 600.0f, filaY + 10.0f, 18);
+				}
+			}
+
+			// Botones de navegacion inferiores
+			dibujarBoton(centroX - 285.0f, 715.0f, 270.0f, 54.0f, "CAMBIAR METODO", 18);
+			dibujarBoton(centroX + 15.0f, 715.0f, 270.0f, 54.0f, "VOLVER AL MENU", 18);
+
+			ventana.display();
+		}
+	}
+}
+
+void interfazGrafica::dibujarTableroReplay(EstadoJuego* estado, float origenX, float origenY, float tamCelda) {
+	sf::RectangleShape marcoNeon(sf::Vector2f((float)COLUMNAS * tamCelda + 4, (float)FILAS * tamCelda + 4));
+	marcoNeon.setPosition(origenX - 2, origenY - 2);
+	marcoNeon.setFillColor(sf::Color::Transparent);
+	marcoNeon.setOutlineColor(COLOR_MARCO_NEON);
+	marcoNeon.setOutlineThickness(2);
+	ventana.draw(marcoNeon);
+
+	sf::RectangleShape fondoTablero(sf::Vector2f((float)COLUMNAS * tamCelda, (float)FILAS * tamCelda));
+	fondoTablero.setPosition(origenX, origenY);
+	fondoTablero.setFillColor(COLOR_TABLERO);
+	ventana.draw(fondoTablero);
+
+	if (!estado) {
+		dibujarTextoC("Sin estado", origenX + (COLUMNAS * tamCelda) / 2, origenY + (FILAS * tamCelda) / 2, 20);
+		return;
+	}
+
+	Tablero& tablero = estado->getTablero();
+	for (int fila = 0; fila < FILAS; fila++) {
+		for (int columna = 0; columna < COLUMNAS; columna++) {
+			int valorCelda = tablero.getCelda(fila, columna);
+			if (valorCelda == 1) {
+				sf::RectangleShape bloque(sf::Vector2f(tamCelda - 1, tamCelda - 1));
+				bloque.setPosition(origenX + columna * tamCelda + 1, origenY + fila * tamCelda + 1);
+				bloque.setFillColor(COLOR_FIJA);
+				bloque.setOutlineColor(COLOR_BORDE_CELDA);
+				bloque.setOutlineThickness(1);
+				ventana.draw(bloque);
+			} else {
+				sf::RectangleShape celdaVacia(sf::Vector2f(tamCelda - 1, tamCelda - 1));
+				celdaVacia.setPosition(origenX + columna * tamCelda + 1, origenY + fila * tamCelda + 1);
+				celdaVacia.setFillColor(sf::Color::Transparent);
+				celdaVacia.setOutlineColor(COLOR_REJILLA);
+				celdaVacia.setOutlineThickness(1);
+				ventana.draw(celdaVacia);
+			}
+		}
+	}
+
+	Pieza p = estado->getPiezaActual();
+	if (p.getTipo() != NINGUNA) {
+		int matrizPieza[4][4];
+		p.getMatriz(matrizPieza);
+		sf::Color colorPieza = Pieza::getColorPorTipo(p.getTipo());
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 4; j++) {
+				if (matrizPieza[i][j] == 1) {
+					int filaTablero = p.getY() + i;
+					int columnaTablero = p.getX() + j;
+					if (filaTablero >= 0 && filaTablero < FILAS && columnaTablero >= 0 && columnaTablero < COLUMNAS) {
+						sf::RectangleShape bloque(sf::Vector2f(tamCelda - 1, tamCelda - 1));
+						bloque.setPosition(origenX + columnaTablero * tamCelda + 1, origenY + filaTablero * tamCelda + 1);
+						bloque.setFillColor(colorPieza);
+						bloque.setOutlineColor(COLOR_BORDE_CELDA);
+						bloque.setOutlineThickness(1);
+						ventana.draw(bloque);
+					}
+				}
+			}
+		}
+	}
+}
+
+string interfazGrafica::mostrarPantallaFinal(string resultado, int puntaje, Replay& replay) {
+	abrirVentana("TETRIS TRON - REPLAY");
+	float centroX = (float)ANCHO_VENTANA / 2;
+	bool esVictoria = (resultado == "victoria");
+	string tituloFinal = esVictoria ? "VICTORIA" : "DERROTA";
+	string textoAccion = esVictoria ? "SIGUIENTE NIVEL" : "JUGAR DE NUEVO";
+
+	float tabX = 60.0f;
+	float tabY = 120.0f;
+	float tamCelda = 34.0f;
+
+	float rx = 450.0f;
+	float rw = 390.0f;
+	float mitadW = (rw - 10.0f) / 2.0f;
+
+	while (ventana.isOpen()) {
+		sf::Event evento;
+		while (ventana.pollEvent(evento)) {
+			if (evento.type == sf::Event::Closed) {
+				return "salir";
+			}
+			if (evento.type == sf::Event::KeyPressed) {
+				if (evento.key.code == sf::Keyboard::Left) {
+					replay.deshacer();
+				} else if (evento.key.code == sf::Keyboard::Right) {
+					replay.rehacer();
+				}
+			}
+			if (evento.type == sf::Event::MouseButtonPressed && evento.mouseButton.button == sf::Mouse::Left) {
+				sf::Vector2i puntoClic(evento.mouseButton.x, evento.mouseButton.y);
+				if (sobreBoton(rx, 305, mitadW, 42, puntoClic)) {
+					replay.irAlInicio();
+				}
+				else if (sobreBoton(rx + mitadW + 10, 305, mitadW, 42, puntoClic)) {
+					replay.irAlFinal();
+				}
+				else if (sobreBoton(rx, 355, mitadW, 42, puntoClic)) {
+					replay.deshacer();
+				}
+				else if (sobreBoton(rx + mitadW + 10, 355, mitadW, 42, puntoClic)) {
+					replay.rehacer();
+				}
+				else if (sobreBoton(rx, 660, rw, 55, puntoClic)) {
+					return esVictoria ? "siguiente" : "reintentar";
+				}
+				else if (sobreBoton(rx, 730, rw, 55, puntoClic)) {
+					return "salir";
+				}
+			}
+		}
+
+		EstadoJuego* estadoActual = replay.getEstadoActual();
+
+		ventana.clear(COLOR_FONDO);
+		dibujarFondo();
+
+		dibujarTextoC(tituloFinal, centroX, 30, 48);
+		dibujarTextoC("Puntaje Final: " + to_string(puntaje), centroX, 82, 22);
+
+		dibujarTableroReplay(estadoActual, tabX, tabY, tamCelda);
+
+		dibujarTexto("--- REPLAY DE PARTIDA ---", rx, 135, 20);
+		int pasoIdx = replay.getIndiceActual();
+		int totalPasos = replay.getTam();
+		dibujarTexto("Paso: " + to_string(pasoIdx) + " / " + to_string(totalPasos), rx, 175, 22);
+
+		if (estadoActual) {
+			dibujarTexto("Puntos turno: " + to_string(estadoActual->getPuntaje()), rx, 212, 18);
+			dibujarTexto("Lineas: " + to_string(estadoActual->getLineas()) + "  |  Nivel: " + to_string(estadoActual->getNivel()), rx, 238, 18);
+		}
+
+		dibujarBoton(rx, 305, mitadW, 42, "|<< INICIO", 18);
+		dibujarBoton(rx + mitadW + 10, 305, mitadW, 42, "FINAL >>|", 18);
+		dibujarBoton(rx, 355, mitadW, 42, "< ANTERIOR", 18);
+		dibujarBoton(rx + mitadW + 10, 355, mitadW, 42, "SIGUIENTE >", 18);
+
+		dibujarBoton(rx, 660, rw, 55, textoAccion, 22);
+		dibujarBoton(rx, 730, rw, 55, "MENU PRINCIPAL", 22);
+
+		ventana.display();
+	}
+	return "salir";
+}
+
+int interfazGrafica::jugarPartida(int nivelInicial, string& resultadoOut, Replay& replayOut) {
+	Juego juego;
+	juego.iniciar();
+	juego.setNivel(nivelInicial);
+
+	abrirVentana("TRON: Tetris Legacy");
+	relojCaida.restart();
+	bool pausado = false;
+
+	while (ventana.isOpen()) {
+		sf::Event evento;
+		while (ventana.pollEvent(evento)) {
+			if (evento.type == sf::Event::Closed) { 
+				resultadoOut = "derrota"; 
+				replayOut.transferirDesde(juego.getHistorial());
+				return juego.getPuntaje(); 
+			}
+			else if (evento.type == sf::Event::KeyPressed){
+				if (evento.key.code == sf::Keyboard::Escape) {
+					pausado = !pausado;
+					if (!pausado) {
+						relojCaida.restart();
+					}
+				} else if (!pausado) {
+					manejarTeclado(juego, evento.key.code);
+					if (juego.getCantLineasPorLimpiar() > 0) {
+						animarLimpiezaLineas(juego);
+						juego.completarLimpiezaLineas();
+						relojCaida.restart();
+					}
+				}
+			}
+			else if (evento.type == sf::Event::MouseButtonPressed && evento.mouseButton.button == sf::Mouse::Left) {
+				sf::Vector2i puntoClic(evento.mouseButton.x, evento.mouseButton.y);
+				float centroX = (float)ANCHO_VENTANA / 2.0f;
+				float pausaX = centroX - 210.0f;
+				float pausaY = (float)ALTO_VENTANA / 2.0f - 150.0f;
+
+				if (pausado) {
+					// Boton Reanudar dentro del cuadro de pausa
+					if (sobreBoton(pausaX + 35.0f, pausaY + 135.0f, 350.0f, 55.0f, puntoClic)) {
+						pausado = false;
+						relojCaida.restart();
+					}
+					// Boton Salir al Menu dentro del cuadro de pausa
+					else if (sobreBoton(pausaX + 35.0f, pausaY + 210.0f, 350.0f, 55.0f, puntoClic)) {
+						resultadoOut = "derrota";
+						replayOut.transferirDesde(juego.getHistorial());
+						return juego.getPuntaje();
+					}
+				} else {
+					if (!juego.getGameOver() && !juego.getWin()) {
+						float panelX = (float)(ORIGEN_TABLERO_X + ANCHO_TABLERO_PX + MARGEN);
+						if (sobreBoton(panelX, 715, 200, 40, puntoClic)) {
+							juego.deshacer();
+							relojCaida.restart();
+						} else if (sobreBoton(panelX, 765, 200, 40, puntoClic)) {
+							juego.rehacer();
+							relojCaida.restart();
+						} else if (sobreBoton(panelX, 815, 200, 40, puntoClic)) {
+							pausado = true;
+						}
+					}
+				}
+			}
+		}
+
+		if (!pausado) {
+			actualizarCaida(juego);
+			if (juego.getCantLineasPorLimpiar() > 0) {
+				animarLimpiezaLineas(juego);
+				juego.completarLimpiezaLineas();
+				relojCaida.restart();
+			}
+		}
+
+		ventana.clear(COLOR_FONDO);
+		dibujarFondo();
+		dibujarTablero(juego);
+		dibujarPiezaActual(juego);
+		dibujarPanel(juego);
+
+		if (pausado) {
+			dibujarOverlayPausa();
+		}
+
+		ventana.display();
+
+		if (juego.getWin() || juego.getGameOver()) {
+			sf::Clock relojEspera;
+			while (relojEspera.getElapsedTime().asSeconds() < 1.5f) {
+				ventana.clear(COLOR_FONDO);
+				dibujarFondo();
+				dibujarTablero(juego);
+				dibujarPiezaActual(juego);
+				dibujarPanel(juego);
+				ventana.display();
+			}
+			if(juego.getWin()){
+				resultadoOut = "victoria";
+			}else{
+				resultadoOut = "derrota";	
+			}
+			replayOut.transferirDesde(juego.getHistorial());
+			return juego.getPuntaje();
+		}
+	}
+	resultadoOut = "derrota";
+	replayOut.transferirDesde(juego.getHistorial());
+	return juego.getPuntaje();
 }
 
 void interfazGrafica::dibujarPanel(Juego& juego) {
-	float px = (float)(ORIGEN_TABLERO_X + ANCHO_TABLERO_PX + MARGEN);
-	float py = (float)ORIGEN_TABLERO_Y;
+	float panelX = (float)(ORIGEN_TABLERO_X + ANCHO_TABLERO_PX + MARGEN);
+	float panelY = (float)ORIGEN_TABLERO_Y;
 
-	dibujarTexto("Puntos", px, py, 16); py += 20;
-	dibujarTexto(std::to_string(juego.getPuntaje()), px, py, 20); py += 34;
+	dibujarTexto("Puntos", panelX, panelY, 16); panelY += 20;
+	dibujarTexto(to_string(juego.getPuntaje()), panelX, panelY, 20); 
+	panelY += 34;
 
-	dibujarTexto("Lineas", px, py, 16); py += 20;
-	dibujarTexto(std::to_string(juego.getLineas()), px, py, 20); py += 34;
+	dibujarTexto("Lineas", panelX, panelY, 16); panelY += 20;
+	dibujarTexto(to_string(juego.getLineas()), panelX, panelY, 20);
+	panelY += 34;
 
-	dibujarTexto("Nivel", px, py, 16); py += 20;
-	dibujarTexto(std::to_string(juego.getNivel()), px, py, 20); py += 34;
+	dibujarTexto("Nivel", panelX, panelY, 16); panelY += 20;
+	dibujarTexto(to_string(juego.getNivel()), panelX, panelY, 20);
+	panelY += 34;
 
-	dibujarTexto("Hold (C)", px, py, 16); py += 22;
+	dibujarTexto("Hold (C)", panelX, panelY, 16); panelY += 22;
 	if (!juego.getHold().vacia()) {
-		dibujarMiniPieza(juego.getHold().top(), px, py, 18);
+		dibujarMiniPieza(juego.getHold().top(), panelX, panelY, 18);
 	}
-	py += 90;
+	panelY += 90;
 
-	dibujarTexto("Siguiente", px, py, 16); py += 22;
+	dibujarTexto("Siguiente", panelX, panelY, 16); panelY += 22;
 	if (juego.getSiguiente()) {
-		dibujarMiniPieza(juego.getSiguiente()->getTipo(), px, py, 18);
+		dibujarMiniPieza(juego.getSiguiente()->getTipo(), panelX, panelY, 18);
 	}
-	py += 90;
+	panelY += 90;
 
-	TipoPieza* prox = juego.getCola().proximas3();
-	if (prox) {
-		dibujarTexto("Cola", px, py, 16); py += 22;
-		for (int i = 0; i < 3; i++) {
-			dibujarMiniPieza(prox[i], px, py, 14);
-			py += 62;
+	TipoPieza* siguientesProximos = juego.getCola().proximas3();
+	if (siguientesProximos) {
+		dibujarTexto("Cola", panelX, panelY, 16); panelY += 22;
+		for (int indice = 0; indice < 3; indice++) {
+			dibujarMiniPieza(siguientesProximos[indice], panelX, panelY, 14);
+			panelY += 62;
 		}
-		delete[] prox;
+		delete[] siguientesProximos;
 	}
 
 	if (juego.getGameOver()) {
-		dibujarTexto("GAME OVER", px, py + 10, 20);
+		dibujarTexto("GAME OVER", panelX, panelY + 10, 20);
 	} else if (juego.getWin()) {
-		dibujarTexto("WIN", px, py + 10, 20);
+		dibujarTexto("WIN", panelX, panelY + 10, 20);
+	}
+
+	dibujarBoton(panelX, 715, 200, 40, "DESHACER (U)", 18);
+	dibujarBoton(panelX, 765, 200, 40, "REHACER (R)", 18);
+	dibujarBoton(panelX, 815, 200, 40, "PAUSA (P)", 18);
+}
+
+void interfazGrafica::animarLimpiezaLineas(Juego& juego) {
+	sf::Clock relojAnim;
+	while (ventana.isOpen() && relojAnim.getElapsedTime().asMilliseconds() < TIEMPO_ANIM_LINEA_MS) {
+		sf::Event evento;
+		while (ventana.pollEvent(evento)) {
+			if (evento.type == sf::Event::Closed) {
+				ventana.close();
+				return;
+			}
+		}
+
+		float tiempoMs = (float)relojAnim.getElapsedTime().asMilliseconds();
+		int alfa = 160 + (int)(95.0f * sin(tiempoMs * 0.05f));
+		if (alfa > 255) alfa = 255;
+		if (alfa < 0) alfa = 0;
+		sf::Color colorBrillo(255, 255, 255, alfa);
+
+		ventana.clear(COLOR_FONDO);
+		dibujarFondo();
+		dibujarTablero(juego);
+		dibujarPiezaActual(juego);
+		dibujarPanel(juego);
+
+		for (int i = 0; i < juego.getCantLineasPorLimpiar(); i++) {
+			int fila = juego.getLineaPorLimpiar(i);
+			float posY = (float)(ORIGEN_TABLERO_Y + fila * TAM_CELDA);
+			sf::RectangleShape barraBrillo(sf::Vector2f((float)ANCHO_TABLERO_PX, (float)TAM_CELDA));
+			barraBrillo.setPosition((float)ORIGEN_TABLERO_X, posY);
+			barraBrillo.setFillColor(colorBrillo);
+			barraBrillo.setOutlineColor(COLOR_MARCO_NEON);
+			barraBrillo.setOutlineThickness(1.0f);
+			ventana.draw(barraBrillo);
+		}
+
+		ventana.display();
 	}
 }
 
+void interfazGrafica::dibujarOverlayPausa() {
+	float centroX = (float)ANCHO_VENTANA / 2.0f;
+	float anchoPausa = 420.0f;
+	float altoPausa = 300.0f;
+	float pausaX = centroX - anchoPausa / 2.0f;
+	float pausaY = (float)ALTO_VENTANA / 2.0f - altoPausa / 2.0f;
+
+	sf::RectangleShape veloPausa(sf::Vector2f((float)ANCHO_VENTANA, (float)ALTO_VENTANA));
+	veloPausa.setPosition(0, 0);
+	veloPausa.setFillColor(sf::Color(5, 8, 16, 210));
+	ventana.draw(veloPausa);
+
+	sf::RectangleShape marcoPausa(sf::Vector2f(anchoPausa, altoPausa));
+	marcoPausa.setPosition(pausaX, pausaY);
+	marcoPausa.setFillColor(sf::Color(8, 20, 38, 245));
+	marcoPausa.setOutlineColor(COLOR_MARCO_NEON);
+	marcoPausa.setOutlineThickness(2.0f);
+	ventana.draw(marcoPausa);
+
+	sf::RectangleShape barraTitulo(sf::Vector2f(anchoPausa, 48.0f));
+	barraTitulo.setPosition(pausaX, pausaY);
+	barraTitulo.setFillColor(sf::Color(0, 60, 90, 220));
+	ventana.draw(barraTitulo);
+
+	sf::RectangleShape lineaDivisoria(sf::Vector2f(anchoPausa, 2.0f));
+	lineaDivisoria.setPosition(pausaX, pausaY + 48.0f);
+	lineaDivisoria.setFillColor(COLOR_MARCO_NEON);
+	ventana.draw(lineaDivisoria);
+
+	dibujarTextoC("JUEGO EN PAUSA", centroX, pausaY + 12.0f, 22);
+	dibujarTextoC("Presiona P o ESC para continuar", centroX, pausaY + 75.0f, 16);
+
+	dibujarBoton(pausaX + 35.0f, pausaY + 135.0f, 350.0f, 55.0f, "REANUDAR", 20);
+	dibujarBoton(pausaX + 35.0f, pausaY + 210.0f, 350.0f, 55.0f, "SALIR AL MENU", 20);
+}
+
 void interfazGrafica::manejarTeclado(Juego& juego, sf::Keyboard::Key tecla) {
-	if (juego.getGameOver() || juego.getWin()) return;
-	if (!juego.getActual()) return;
+	if (juego.getGameOver() || juego.getWin()){
+		return;
+	}
+	if (!juego.getActual()){
+		return;
+	}
 	switch (tecla) {
-		case sf::Keyboard::Left: juego.moverIzquierda(); break;
-		case sf::Keyboard::Right: juego.moverDerecha(); break;
-		case sf::Keyboard::Down: juego.bajar(); relojCaida.restart(); break;
-		case sf::Keyboard::Up: juego.rotarHorario(); break;
-		case sf::Keyboard::Z: juego.rotarAntiHorario(); break;
-		case sf::Keyboard::Space: juego.hardDrop(); relojCaida.restart(); break;
-		case sf::Keyboard::C: juego.intercambiarHold(); break;
-		case sf::Keyboard::U: juego.deshacer(); break;
-		case sf::Keyboard::R: juego.rehacer(); break;
+	case sf::Keyboard::Left:
+		juego.moverIzquierda(); 
+	break;
+		case sf::Keyboard::Right: 
+			juego.moverDerecha(); 
+		break;
+		case sf::Keyboard::Down: 
+			juego.bajar(); relojCaida.restart(); 
+			break;
+		case sf::Keyboard::Up: 
+			juego.rotarHorario(); 
+		break;
+		case sf::Keyboard::Z: 
+			juego.rotarAntiHorario(); 
+		break;
+		case sf::Keyboard::Space: 
+			juego.hardDrop(); relojCaida.restart(); 
+			break;
+		case sf::Keyboard::C: 
+			juego.intercambiarHold(); 
+		break;
+		case sf::Keyboard::U: 
+			juego.deshacer(); 
+		break;
+		case sf::Keyboard::R: 
+			juego.rehacer(); 
+		break;
 		default: break;
 	}
 }
 
 void interfazGrafica::actualizarCaida(Juego& juego) {
-	if (juego.getGameOver() || juego.getWin()) return;
-	if (!juego.getActual()) return;
+	if (juego.getGameOver() || juego.getWin()){
+		return;
+	}
+	if (!juego.getActual()) {
+		return;
+	}
 	float intervalo = juego.getTiempoCaida();
 	if (relojCaida.getElapsedTime().asMilliseconds() >= intervalo) {
 		juego.bajar();
@@ -214,33 +848,32 @@ void interfazGrafica::actualizarCaida(Juego& juego) {
 	}
 }
 
-int interfazGrafica::ejecutar() {
-	Juego juego;
-	juego.iniciar();
-
-	ventana.create(sf::VideoMode(ANCHO_VENTANA, ALTO_VENTANA), "TRON: Tetris Legacy - T3.1");
+void interfazGrafica::abrirVentana(string titulo) {
+	if (ventana.isOpen()) ventana.close();
+	ventana.create(sf::VideoMode(ANCHO_VENTANA, ALTO_VENTANA), titulo);
 	ventana.setFramerateLimit(60);
+}
+
+int interfazGrafica::ejecutar() {
 	fuenteOK = cargarFuente();
 	fondoOK = cargarFondo();
-	relojCaida.restart();
 
-	while (ventana.isOpen()) {
-		sf::Event e;
-		while (ventana.pollEvent(e)) {
-			if (e.type == sf::Event::Closed) {
-				ventana.close();
-			} else if (e.type == sf::Event::KeyPressed) {
-				manejarTeclado(juego, e.key.code);
-			}
+	int nivelActual = 1;
+	while (true) {
+		int opcionMenu = mostrarMenu();
+		if (opcionMenu == 0) {
+			return 0;
 		}
-		actualizarCaida(juego);
-
-		ventana.clear(COLOR_FONDO);
-		dibujarFondo();
-		dibujarTablero(juego);
-		dibujarPiezaActual(juego);
-		dibujarPanel(juego);
-		ventana.display();
+		string resultadoPartida;
+		Replay replayPartida;
+		int puntosPartida = jugarPartida(nivelActual, resultadoPartida, replayPartida);
+		guardarPuntaje(puntosPartida);
+		string accionFinal = mostrarPantallaFinal(resultadoPartida, puntosPartida, replayPartida);
+		if (accionFinal == "salir") {
+			continue;
+		}
+		if (accionFinal == "siguiente") {
+			nivelActual++;
+		}
 	}
-	return 0;
 }

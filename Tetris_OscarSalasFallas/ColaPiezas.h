@@ -23,6 +23,7 @@ public:
 	TipoPieza* proximas3();
 	void rellenarBolsa();
 	~ColaPiezas();
+	void copiarDesde(ColaPiezas& entrante);
 
 };
 

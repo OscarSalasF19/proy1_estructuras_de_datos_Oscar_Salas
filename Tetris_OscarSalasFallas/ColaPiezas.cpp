@@ -80,6 +80,20 @@ ColaPiezas::~ColaPiezas(){
 		}
 	}
 }
+void ColaPiezas::copiarDesde(ColaPiezas& entrante){
+	while(frente){
+		Nodo* aux = frente;
+		frente = frente->siguiente;
+		delete aux;
+	}
+	final = nullptr;
+	tam = 0;
+	Nodo* aux = entrante.frente;
+	while(aux){
+		encolar(aux->dato);
+		aux = aux->siguiente;
+	}
+}
 
 
 

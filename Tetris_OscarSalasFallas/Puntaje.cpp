@@ -89,3 +89,15 @@ void Puntaje::mergeSort(int inicio, int final){
 void Puntaje::iniciarMergeSort(){
 	mergeSort(0, tam-1);
 }
+string Puntaje::getNombre(int indice){
+	return historico[indice].nombreJugador;
+}
+int Puntaje::getPuntos(int indice){
+	return historico[indice].puntos;
+}
+string Puntaje::getFecha(int indice){
+	return historico[indice].fecha;
+}
+int Puntaje::getTam(){
+	return tam;
+}

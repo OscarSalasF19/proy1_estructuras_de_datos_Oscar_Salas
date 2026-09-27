@@ -1,4 +1,5 @@
 #include "Replay.h"
+#include <iostream>
 Replay::Replay(){
 	this->actual = nullptr;
 	this->cabeza = nullptr;
@@ -9,6 +10,8 @@ void Replay::agregarEstado(EstadoJuego* e){
 	Nodo* nuevo = new Nodo;
 	nuevo->estado.setTablero(e->getTablero());
 	nuevo->estado.setPiezaActual(e->getPiezaActual());
+	nuevo->estado.setSiguientePieza(e->getSiguientePieza());
+	nuevo->estado.setBolsaActual(e->getBolsaActual());
 	nuevo->estado.setHold(e->getHold());
 	nuevo->estado.setLineas(e->getLineas());
 	nuevo->estado.setNivel(e->getNivel());
@@ -65,7 +68,52 @@ Replay::~Replay(){
 }
 
 void Replay::reproducirDesdeInicio(){
-	// TODO T3.2 SFML: recorrer cabeza->cola con sf::Clock 300-500ms y dibujar cada EstadoJuego via InterfazSFML
+	irAlInicio();
+}
+
+void Replay::irAlInicio(){
+	actual = cabeza;
+}
+
+void Replay::irAlFinal(){
+	actual = cola;
+}
+
+int Replay::getIndiceActual(){
+	if(!actual || !cabeza){
+		return 0;
+	}
+	int idx = 1;
+	Nodo* aux = cabeza;
+	while(aux && aux != actual){
+		idx++;
+		aux = aux->siguiente;
+	}
+	return idx;
+}
+
+void Replay::vaciar(){
+	while(cabeza){
+		Nodo* aux = cabeza;
+		cabeza = cabeza->siguiente;
+		delete aux;
+	}
+	cabeza = nullptr;
+	cola = nullptr;
+	actual = nullptr;
+	tam = 0;
+}
+
+void Replay::transferirDesde(Replay& origen){
+	vaciar();
+	this->cabeza = origen.cabeza;
+	this->cola = origen.cola;
+	this->actual = origen.actual;
+	this->tam = origen.tam;
+	origen.cabeza = nullptr;
+	origen.cola = nullptr;
+	origen.actual = nullptr;
+	origen.tam = 0;
 }
 int Replay::getTam(){
 	return tam;

@@ -23,6 +23,9 @@ private:
 	Replay historial;
 	bool holdHecho;
 	bool win;
+	int lineasPorLimpiar[4];
+	int cantLineasPorLimpiar;
+	int cantidadDeReversiones;
 	
 public:
 	Juego();
@@ -56,6 +59,10 @@ public:
 	bool getHoldHecho();
 	bool getWin();
 	void setNivel(int nivel);
+
+	int getCantLineasPorLimpiar();
+	int getLineaPorLimpiar(int idx);
+	void completarLimpiezaLineas();
 };
 #endif
 

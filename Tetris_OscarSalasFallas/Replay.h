@@ -25,6 +25,11 @@ public:
 	bool puedeDeshacer();
 	bool puedeRehacer();
 	EstadoJuego* getEstadoActual();
+	void irAlInicio();
+	void irAlFinal();
+	int getIndiceActual();
+	void vaciar();
+	void transferirDesde(Replay& origen);
 	
 };
 

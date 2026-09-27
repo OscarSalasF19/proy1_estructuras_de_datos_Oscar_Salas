@@ -14,6 +14,8 @@ Juego::Juego(){
 	this->historial = Replay();
 	win = false;
 	holdHecho = false;
+	cantLineasPorLimpiar = 0;
+	cantidadDeReversiones = 0;
 }
 
 Juego::~Juego(){
@@ -29,6 +31,8 @@ Juego::~Juego(){
 void Juego::iniciar(){
 	tablero.crearTableroVacio();
 	cola.rellenarBolsa();
+	cantLineasPorLimpiar = 0;
+	cantidadDeReversiones = 0;
 	spawnPieza();
 	
 }
@@ -36,6 +40,7 @@ void Juego::spawnPieza(){
 	if(actual == nullptr && siguiente == nullptr){
 	actual = new Pieza(cola.desencolar());
 	siguiente = new Pieza(cola.desencolar());
+	
 	}
 	else{
 		delete actual;
@@ -115,18 +120,24 @@ void Juego::hardDrop(){
 		*actual = aux;
 		aux.mover(0,1);
 	}
-	tablero.insertaPieza(actual);
-	holdHecho = false;
-	int cant = tablero.limpiarLineasCompletas();
-	lineas+= cant;
-	puntaje += 200 * cant * nivel;
-	spawnPieza();
+	fijarPieza();
+	agregarHistorial();
 }
 void Juego::fijarPieza(){
 	tablero.insertaPieza(actual);
-	verificarLineas();
-	spawnPieza();
 	holdHecho = false;
+
+	cantLineasPorLimpiar = 0;
+	for(int i = 0; i < FILAS; i++){
+		if(tablero.esFilaCompleta(i) && cantLineasPorLimpiar < 4){
+			lineasPorLimpiar[cantLineasPorLimpiar] = i;
+			cantLineasPorLimpiar++;
+		}
+	}
+
+	if(cantLineasPorLimpiar == 0){
+		spawnPieza();
+	}
 }
 void Juego::verificarLineas(){
 	int cantidadLineas = tablero.limpiarLineasCompletas(); 
@@ -135,6 +146,20 @@ void Juego::verificarLineas(){
 	if(lineas >= (LINEAS_POR_NIVEL * nivel)){
 		win = true;
 	}
+}
+void Juego::completarLimpiezaLineas(){
+	verificarLineas();
+	cantLineasPorLimpiar = 0;
+	spawnPieza();
+}
+int Juego::getCantLineasPorLimpiar(){
+	return cantLineasPorLimpiar;
+}
+int Juego::getLineaPorLimpiar(int idx){
+	if(idx >= 0 && idx < cantLineasPorLimpiar){
+		return lineasPorLimpiar[idx];
+	}
+	return -1;
 }
 
 void Juego::intercambiarHold(){
@@ -157,15 +182,19 @@ void Juego::intercambiarHold(){
 }
 
 void Juego::agregarHistorial(){
-	EstadoJuego* nuevoEstado = new EstadoJuego(tablero, actual, hold.top(), puntaje, lineas, nivel);
+	EstadoJuego* nuevoEstado = new EstadoJuego(tablero, actual, siguiente, cola, hold.top(), puntaje, lineas, nivel);
 	historial.agregarEstado(nuevoEstado);
 	delete nuevoEstado;
+	if(cantidadDeReversiones - 1 > 0){
+		cantidadDeReversiones--;
+	}
 	
 }
 
 void Juego::deshacer(){
-	if(historial.puedeDeshacer()){
+	if(historial.puedeDeshacer() && cantidadDeReversiones < 2){
 		historial.deshacer();
+		cantidadDeReversiones++;
 		EstadoJuego* e = historial.getEstadoActual();
 		if(e){
 			tablero.copiarDesde(e->getTablero());
@@ -174,6 +203,9 @@ void Juego::deshacer(){
 			}
 			Pieza p = e->getPiezaActual();
 			actual = new Pieza(p.getTipo(), p.getRotacion(), p.getX(), p.getY());
+			Pieza sig = e->getSiguientePieza();
+			siguiente = new Pieza(sig.getTipo(), sig.getRotacion(), sig.getX(), sig.getY());
+			cola.copiarDesde(e->getBolsaActual());
 			while(!hold.vacia()){
 				hold.pop();
 			}
@@ -183,12 +215,14 @@ void Juego::deshacer(){
 			puntaje = e->getPuntaje();
 			lineas = e->getLineas();
 			nivel = e->getNivel();
+			cantLineasPorLimpiar = 0;
 		}
 	}
 }
 
 void Juego::rehacer(){
 	if(historial.puedeRehacer()){
+		cantidadDeReversiones--;
 		historial.rehacer();
 		EstadoJuego* e = historial.getEstadoActual();
 		if(e){
@@ -198,6 +232,9 @@ void Juego::rehacer(){
 			}
 			Pieza p = e->getPiezaActual();
 			actual = new Pieza(p.getTipo(), p.getRotacion(), p.getX(), p.getY());
+			Pieza sig = e->getSiguientePieza();
+			siguiente = new Pieza(sig.getTipo(), sig.getRotacion(), sig.getX(), sig.getY());
+			cola.copiarDesde(e->getBolsaActual());
 			while(!hold.vacia()){
 				hold.pop();
 			}
@@ -207,6 +244,7 @@ void Juego::rehacer(){
 			puntaje = e->getPuntaje();
 			lineas = e->getLineas();
 			nivel = e->getNivel();
+			cantLineasPorLimpiar = 0;
 		}
 	}
 }
