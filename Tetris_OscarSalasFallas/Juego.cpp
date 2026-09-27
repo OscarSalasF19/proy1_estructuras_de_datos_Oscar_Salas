@@ -12,10 +12,12 @@ Juego::Juego(){
 	setNivel(1);
 	this->gameOver = false;
 	this->historial = Replay();
-	win = false;
-	holdHecho = false;
-	cantLineasPorLimpiar = 0;
-	cantidadDeReversiones = 0;
+	this->win = false;
+	this->holdHecho = false;
+	this->cantLineasPorLimpiar = 0;
+	this->bomba = false;
+	this->doblePuntos = false;
+	this->caidaRapida = false;
 }
 
 Juego::~Juego(){
@@ -32,7 +34,6 @@ void Juego::iniciar(){
 	tablero.crearTableroVacio();
 	cola.rellenarBolsa();
 	cantLineasPorLimpiar = 0;
-	cantidadDeReversiones = 0;
 	spawnPieza();
 	
 }
@@ -125,6 +126,24 @@ void Juego::hardDrop(){
 }
 void Juego::fijarPieza(){
 	tablero.insertaPieza(actual);
+	if(bomba){
+		int matrizActual[4][4];
+		actual->getMatriz(matrizActual);
+		for(int i = 0; i < 4; i++){
+			for(int j = 0; j < 4; j ++){
+				if(matrizActual[i][j]== 1){
+					tablero.eliminarFila(i + actual->getY());
+					puntaje += 200*nivel;
+					lineas ++;
+					if(lineas >= LINEAS_POR_NIVEL * nivel){
+						win = true;
+					}
+					j = 4;
+				}
+			}
+		}
+		bomba = false;
+	}
 	holdHecho = false;
 
 	cantLineasPorLimpiar = 0;
@@ -142,7 +161,11 @@ void Juego::fijarPieza(){
 void Juego::verificarLineas(){
 	int cantidadLineas = tablero.limpiarLineasCompletas(); 
 	lineas += cantidadLineas;
-	puntaje += cantidadLineas * 200 * nivel;
+	if(doblePuntos){
+		puntaje += cantidadLineas * 200 * nivel * 2;
+	}else{
+		puntaje += cantidadLineas * 200 * nivel;	
+	}
 	if(lineas >= (LINEAS_POR_NIVEL * nivel)){
 		win = true;
 	}
@@ -185,16 +208,11 @@ void Juego::agregarHistorial(){
 	EstadoJuego* nuevoEstado = new EstadoJuego(tablero, actual, siguiente, cola, hold.top(), puntaje, lineas, nivel);
 	historial.agregarEstado(nuevoEstado);
 	delete nuevoEstado;
-	if(cantidadDeReversiones - 1 > 0){
-		cantidadDeReversiones--;
-	}
-	
 }
 
 void Juego::deshacer(){
-	if(historial.puedeDeshacer() && cantidadDeReversiones < 2){
+	if(historial.puedeDeshacer()){
 		historial.deshacer();
-		cantidadDeReversiones++;
 		EstadoJuego* e = historial.getEstadoActual();
 		if(e){
 			tablero.copiarDesde(e->getTablero());
@@ -222,7 +240,6 @@ void Juego::deshacer(){
 
 void Juego::rehacer(){
 	if(historial.puedeRehacer()){
-		cantidadDeReversiones--;
 		historial.rehacer();
 		EstadoJuego* e = historial.getEstadoActual();
 		if(e){
@@ -274,6 +291,9 @@ int Juego::getNivel(){
 	return nivel; 
 }
 float Juego::getTiempoCaida(){ 
+	if(caidaRapida){
+		return tiempoCaida / 2.0;
+	}
 	return tiempoCaida; 
 }
 bool Juego::getGameOver(){ 
@@ -295,5 +315,55 @@ void Juego::setNivel(int nivel){
 		tiempoCaida = TIEMPO_CAIDA_MIN_MS;
 	}
 	
+}
+
+void Juego::actualizarEvento(int tiempoActual){
+	if(eventos.vacia()){
+		eventos.rellenar(tiempoActual);
+	}
+	if((caidaRapida || doblePuntos) && tiempoActual - eventoActual.momentoActivacion >= eventoActual.duracionSegundos){
+		this->caidaRapida = false;
+		this->doblePuntos = false;
+	}
+	if(eventos.debeDispararse(tiempoActual)){
+		eventos.disparar(eventoActual);
+		if(eventoActual.tipo == EV_AUMENTO_VELOCIDAD){
+			this->caidaRapida = true;
+		}
+		else if(eventoActual.tipo == EV_BONUS_PUNTAJE){
+			this->doblePuntos = true;
+		}
+		else{
+			this->bomba = true;
+		}
+		eventoActual.momentoActivacion = tiempoActual;
+	}
+
+}
+
+string Juego::proximoEvento(){
+	Evento proximoE;
+	if(eventos.proximo(proximoE)){
+		return proximoE.descripcion;
+	}
+	return "Ninguno";
+}
+bool Juego::getCaidaRapida(){
+	return caidaRapida;
+}
+bool Juego::getBomba(){
+	return bomba;
+}
+bool Juego::getDoblePuntos(){
+	return doblePuntos;
+}
+
+int Juego::duracionParaProximoEvento(int tiempoActual){
+	Evento proximoE;
+	if(eventos.proximo(proximoE)){
+		int restante = proximoE.momentoDisparo - tiempoActual;
+		return restante > 0 ? restante : 0;
+	}
+	return 0;
 }
 

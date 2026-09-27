@@ -1,5 +1,4 @@
 #include "Replay.h"
-#include <iostream>
 Replay::Replay(){
 	this->actual = nullptr;
 	this->cabeza = nullptr;

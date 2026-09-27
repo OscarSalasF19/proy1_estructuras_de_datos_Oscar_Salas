@@ -25,8 +25,10 @@ private:
 	bool win;
 	int lineasPorLimpiar[4];
 	int cantLineasPorLimpiar;
-	int cantidadDeReversiones;
-	
+	bool doblePuntos;
+	bool caidaRapida;
+	bool bomba;
+	Evento eventoActual;
 public:
 	Juego();
 	~Juego();
@@ -63,6 +65,12 @@ public:
 	int getCantLineasPorLimpiar();
 	int getLineaPorLimpiar(int idx);
 	void completarLimpiezaLineas();
+	void actualizarEvento(int tiempoActual);
+	string proximoEvento();
+	bool getCaidaRapida();
+	bool getBomba();
+	bool getDoblePuntos();
+	int duracionParaProximoEvento(int tiempoActual);
 };
 #endif
 

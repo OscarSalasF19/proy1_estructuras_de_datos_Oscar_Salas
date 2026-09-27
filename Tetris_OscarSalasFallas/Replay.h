@@ -1,6 +1,7 @@
 #ifndef REPLAY_H
 #define REPLAY_H
 #include "EstadoJuego.h"
+#include <iostream>
 class Replay {
 private:
 	struct Nodo{

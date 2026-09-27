@@ -4,7 +4,11 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <string>
+#include <fstream>
+#include <ctime>
 #include "Juego.h"
+#include "Constantes.h"
+#include "Puntaje.h"
 using namespace std;
 
 class interfazGrafica {
@@ -16,6 +20,7 @@ private:
 	sf::Texture texFondo;
 	sf::Sprite sprFondo;
 	bool fondoOK;
+	float tiempoPartidaSegundos;
 
 	bool cargarFuente();
 	bool cargarFondo();
@@ -33,7 +38,7 @@ private:
 	void manejarTeclado(Juego& juego, sf::Keyboard::Key tecla);
 	void actualizarCaida(Juego& juego);
 	int jugarPartida(int nivelInicial, string& resultadoOut, Replay& replayOut);
-	void guardarPuntaje(int puntos);
+	void guardarPuntaje(int puntos, string nombre = "JUGADOR");
 	void dibujarTableroReplay(EstadoJuego* estado, float origenX, float origenY, float tamCelda);
 	void animarLimpiezaLineas(Juego& juego);
 	void dibujarOverlayPausa();

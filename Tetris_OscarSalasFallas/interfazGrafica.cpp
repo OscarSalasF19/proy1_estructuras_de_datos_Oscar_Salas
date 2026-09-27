@@ -1,18 +1,9 @@
 #include "interfazGrafica.h"
-#include "Constantes.h"
-#include "Puntaje.h"
-#include <iostream>
-#include <string>
-#include <fstream>
-#include <vector>
-#include <algorithm>
-#include <ctime>
-#include <cmath>
-using namespace std;
 
 interfazGrafica::interfazGrafica() {
 	fuenteOK = false;
 	fondoOK = false;
+	tiempoPartidaSegundos = 0.0f;
 }
 
 bool interfazGrafica::cargarFuente() {
@@ -221,7 +212,10 @@ int interfazGrafica::mostrarMenu() {
 	return 0;
 }
 
-void interfazGrafica::guardarPuntaje(int puntos) {
+void interfazGrafica::guardarPuntaje(int puntos, string nombre) {
+	if (nombre.empty()) {
+		nombre = "JUGADOR";
+	}
 	time_t marcaTiempo = time(0);
 	char fechaTexto[16] = "sin-fecha";
 	if (marcaTiempo != (time_t)-1) {
@@ -230,7 +224,7 @@ void interfazGrafica::guardarPuntaje(int puntos) {
 	}
 	ofstream archivoSalida(ARCHIVO_PUNTAJES, ios::app);
 	if (archivoSalida){
-		archivoSalida << puntos << "|JUGADOR|" << fechaTexto << "\n";
+		archivoSalida << puntos << "|" << nombre << "|" << fechaTexto << "\n";
 	}
 }
 
@@ -241,7 +235,6 @@ void interfazGrafica::mostrarEstadisticas() {
 	float botonX = centroX - anchoBoton / 2.0f;
 
 	while (ventana.isOpen()) {
-		// --- FASE 1: SELECCIONAR METODO DE ORDENAMIENTO ---
 		abrirVentana("TETRIS TRON - METODO DE ORDENAMIENTO");
 		string metodoElegido = "";
 
@@ -281,7 +274,6 @@ void interfazGrafica::mostrarEstadisticas() {
 			return;
 		}
 
-		// --- CARGAR Y ORDENAR PUNTAJES SEGUN EL METODO ELEGIDO ---
 		Puntaje tablaPuntajes;
 		ifstream archivoEntrada(ARCHIVO_PUNTAJES);
 		if (archivoEntrada) {
@@ -310,7 +302,6 @@ void interfazGrafica::mostrarEstadisticas() {
 			tablaPuntajes.iniciarMergeSort();
 		}
 
-		// --- FASE 2: MOSTRAR TABLA DE ESTADISTICAS CON ENCABEZADOS ---
 		abrirVentana("TETRIS TRON - TOP 10 (" + metodoElegido + ")");
 		bool volverASeleccion = false;
 
@@ -328,11 +319,9 @@ void interfazGrafica::mostrarEstadisticas() {
 				}
 				if (evento.type == sf::Event::MouseButtonPressed && evento.mouseButton.button == sf::Mouse::Left) {
 					sf::Vector2i puntoClic(evento.mouseButton.x, evento.mouseButton.y);
-					// Boton para cambiar metodo de ordenamiento
 					if (sobreBoton(centroX - 285.0f, 715.0f, 270.0f, 54.0f, puntoClic)) {
 						volverASeleccion = true;
 					}
-					// Boton para volver al menu principal
 					if (sobreBoton(centroX + 15.0f, 715.0f, 270.0f, 54.0f, puntoClic)) {
 						return;
 					}
@@ -342,11 +331,9 @@ void interfazGrafica::mostrarEstadisticas() {
 			ventana.clear(COLOR_FONDO);
 			dibujarFondo();
 
-			// Titulo y Subtitulo indicando el metodo utilizado
 			dibujarTextoC("TOP 10 MEJORES PUNTAJES", centroX, 60.0f, 40);
 			dibujarTextoC("ORDENADO POR: " + metodoElegido, centroX, 115.0f, 20);
 
-			// Marco exterior del cuadro de estadisticas
 			sf::RectangleShape marcoCuadro(sf::Vector2f(anchoCuadro, altoCuadro));
 			marcoCuadro.setPosition(cuadroX, cuadroY);
 			marcoCuadro.setFillColor(sf::Color(8, 20, 38, 230));
@@ -354,26 +341,22 @@ void interfazGrafica::mostrarEstadisticas() {
 			marcoCuadro.setOutlineThickness(2.0f);
 			ventana.draw(marcoCuadro);
 
-			// Barra superior para los encabezados
 			sf::RectangleShape barraHeader(sf::Vector2f(anchoCuadro, altoHeader));
 			barraHeader.setPosition(cuadroX, cuadroY);
 			barraHeader.setFillColor(sf::Color(0, 60, 90, 220));
 			ventana.draw(barraHeader);
 
-			// Linea divisoria neon debajo de los encabezados
 			sf::RectangleShape lineaSeparador(sf::Vector2f(anchoCuadro, 2.0f));
 			lineaSeparador.setPosition(cuadroX, cuadroY + altoHeader);
 			lineaSeparador.setFillColor(COLOR_MARCO_NEON);
 			ventana.draw(lineaSeparador);
 
-			// Encabezados de columna
 			float headerTextoY = cuadroY + 12.0f;
 			dibujarTexto("POS", cuadroX + 35.0f, headerTextoY, 20);
 			dibujarTexto("JUGADOR", cuadroX + 150.0f, headerTextoY, 20);
 			dibujarTexto("PUNTAJE", cuadroX + 410.0f, headerTextoY, 20);
 			dibujarTexto("FECHA", cuadroX + 600.0f, headerTextoY, 20);
 
-			// Registros de la tabla
 			int cantidadRegistros = tablaPuntajes.getTam();
 			if (cantidadRegistros == 0) {
 				dibujarTextoC("NO HAY REGISTROS DE PUNTAJE", centroX, cuadroY + 220.0f, 22);
@@ -383,7 +366,6 @@ void interfazGrafica::mostrarEstadisticas() {
 				for (int i = 0; i < topeMostrado; i++) {
 					float filaY = cuadroY + altoHeader + 4.0f + (float)i * altoFila;
 
-					// Sombreado alterno en filas impares
 					if (i % 2 == 1) {
 						sf::RectangleShape filaSombra(sf::Vector2f(anchoCuadro - 6.0f, altoFila - 2.0f));
 						filaSombra.setPosition(cuadroX + 3.0f, filaY);
@@ -403,7 +385,6 @@ void interfazGrafica::mostrarEstadisticas() {
 				}
 			}
 
-			// Botones de navegacion inferiores
 			dibujarBoton(centroX - 285.0f, 715.0f, 270.0f, 54.0f, "CAMBIAR METODO", 18);
 			dibujarBoton(centroX + 15.0f, 715.0f, 270.0f, 54.0f, "VOLVER AL MENU", 18);
 
@@ -491,11 +472,37 @@ string interfazGrafica::mostrarPantallaFinal(string resultado, int puntaje, Repl
 	float rw = 390.0f;
 	float mitadW = (rw - 10.0f) / 2.0f;
 
+	string nombreJugador = "";
+	bool guardado = false;
+	sf::Clock relojCursor;
+
 	while (ventana.isOpen()) {
 		sf::Event evento;
 		while (ventana.pollEvent(evento)) {
 			if (evento.type == sf::Event::Closed) {
+				if (!guardado) {
+					guardarPuntaje(puntaje, nombreJugador.empty() ? "JUGADOR" : nombreJugador);
+					guardado = true;
+				}
 				return "salir";
+			}
+			if (evento.type == sf::Event::TextEntered) {
+				if (evento.text.unicode == 8) {
+					if (!nombreJugador.empty()) {
+						nombreJugador.pop_back();
+						guardado = false;
+					}
+				} else if (evento.text.unicode == 13 || evento.text.unicode == 10) {
+					if (!guardado) {
+						guardarPuntaje(puntaje, nombreJugador.empty() ? "JUGADOR" : nombreJugador);
+						guardado = true;
+					}
+				} else if (evento.text.unicode >= 32 && evento.text.unicode <= 126 && evento.text.unicode != '|') {
+					if (nombreJugador.size() < 12) {
+						nombreJugador += (char)evento.text.unicode;
+						guardado = false;
+					}
+				}
 			}
 			if (evento.type == sf::Event::KeyPressed) {
 				if (evento.key.code == sf::Keyboard::Left) {
@@ -518,10 +525,24 @@ string interfazGrafica::mostrarPantallaFinal(string resultado, int puntaje, Repl
 				else if (sobreBoton(rx + mitadW + 10, 355, mitadW, 42, puntoClic)) {
 					replay.rehacer();
 				}
+				else if (sobreBoton(rx, 505, rw, 42, puntoClic)) {
+					if (!guardado) {
+						guardarPuntaje(puntaje, nombreJugador.empty() ? "JUGADOR" : nombreJugador);
+						guardado = true;
+					}
+				}
 				else if (sobreBoton(rx, 660, rw, 55, puntoClic)) {
+					if (!guardado) {
+						guardarPuntaje(puntaje, nombreJugador.empty() ? "JUGADOR" : nombreJugador);
+						guardado = true;
+					}
 					return esVictoria ? "siguiente" : "reintentar";
 				}
 				else if (sobreBoton(rx, 730, rw, 55, puntoClic)) {
+					if (!guardado) {
+						guardarPuntaje(puntaje, nombreJugador.empty() ? "JUGADOR" : nombreJugador);
+						guardado = true;
+					}
 					return "salir";
 				}
 			}
@@ -552,10 +573,37 @@ string interfazGrafica::mostrarPantallaFinal(string resultado, int puntaje, Repl
 		dibujarBoton(rx, 355, mitadW, 42, "< ANTERIOR", 18);
 		dibujarBoton(rx + mitadW + 10, 355, mitadW, 42, "SIGUIENTE >", 18);
 
+		// Cuadro de texto para ingresar nombre
+		dibujarTexto("REGISTRAR JUGADOR:", rx, 418, 18);
+
+		sf::RectangleShape cajaNombre(sf::Vector2f(rw, 46.0f));
+		cajaNombre.setPosition(rx, 448.0f);
+		cajaNombre.setFillColor(sf::Color(8, 20, 38, 230));
+		cajaNombre.setOutlineColor(COLOR_MARCO_NEON);
+		cajaNombre.setOutlineThickness(2.0f);
+		ventana.draw(cajaNombre);
+
+		bool cursorVisible = ((int)(relojCursor.getElapsedTime().asSeconds() * 2.0f) % 2 == 0);
+		if (nombreJugador.empty()) {
+			dibujarTexto(cursorVisible ? "_" : "Escribe tu nombre...", rx + 14.0f, 460.0f, 18);
+		} else {
+			string textoConCursor = nombreJugador + (cursorVisible ? "_" : "");
+			dibujarTexto(textoConCursor, rx + 14.0f, 460.0f, 18);
+		}
+
+		string textoBotonGuardar = guardado ? "¡REGISTRADO CON EXITO!" : "GUARDAR NOMBRE (ENTER)";
+		dibujarBoton(rx, 505, rw, 42, textoBotonGuardar, 18);
+		dibujarTexto("Se guardara en mejores_puntajes.txt", rx + 12.0f, 560, 14);
+
 		dibujarBoton(rx, 660, rw, 55, textoAccion, 22);
 		dibujarBoton(rx, 730, rw, 55, "MENU PRINCIPAL", 22);
 
 		ventana.display();
+	}
+
+	if (!guardado) {
+		guardarPuntaje(puntaje, nombreJugador.empty() ? "JUGADOR" : nombreJugador);
+		guardado = true;
 	}
 	return "salir";
 }
@@ -568,6 +616,8 @@ int interfazGrafica::jugarPartida(int nivelInicial, string& resultadoOut, Replay
 	abrirVentana("TRON: Tetris Legacy");
 	relojCaida.restart();
 	bool pausado = false;
+	tiempoPartidaSegundos = 0.0f;
+	sf::Clock relojFrame;
 
 	while (ventana.isOpen()) {
 		sf::Event evento;
@@ -582,6 +632,7 @@ int interfazGrafica::jugarPartida(int nivelInicial, string& resultadoOut, Replay
 					pausado = !pausado;
 					if (!pausado) {
 						relojCaida.restart();
+						relojFrame.restart();
 					}
 				} else if (!pausado) {
 					manejarTeclado(juego, evento.key.code);
@@ -599,12 +650,11 @@ int interfazGrafica::jugarPartida(int nivelInicial, string& resultadoOut, Replay
 				float pausaY = (float)ALTO_VENTANA / 2.0f - 150.0f;
 
 				if (pausado) {
-					// Boton Reanudar dentro del cuadro de pausa
 					if (sobreBoton(pausaX + 35.0f, pausaY + 135.0f, 350.0f, 55.0f, puntoClic)) {
 						pausado = false;
 						relojCaida.restart();
+						relojFrame.restart();
 					}
-					// Boton Salir al Menu dentro del cuadro de pausa
 					else if (sobreBoton(pausaX + 35.0f, pausaY + 210.0f, 350.0f, 55.0f, puntoClic)) {
 						resultadoOut = "derrota";
 						replayOut.transferirDesde(juego.getHistorial());
@@ -627,7 +677,10 @@ int interfazGrafica::jugarPartida(int nivelInicial, string& resultadoOut, Replay
 			}
 		}
 
+		float dt = relojFrame.restart().asSeconds();
 		if (!pausado) {
+			tiempoPartidaSegundos += dt;
+			juego.actualizarEvento((int)tiempoPartidaSegundos);
 			actualizarCaida(juego);
 			if (juego.getCantLineasPorLimpiar() > 0) {
 				animarLimpiezaLineas(juego);
@@ -640,6 +693,16 @@ int interfazGrafica::jugarPartida(int nivelInicial, string& resultadoOut, Replay
 		dibujarFondo();
 		dibujarTablero(juego);
 		dibujarPiezaActual(juego);
+
+		float centroTableroX = (float)ORIGEN_TABLERO_X + (float)ANCHO_TABLERO_PX / 2.0f;
+		if (juego.getCaidaRapida()) {
+			dibujarTextoC(">>> TURBO VELOCIDAD 2X <<<", centroTableroX, 16.0f, 18);
+		} else if (juego.getDoblePuntos()) {
+			dibujarTextoC(">>> PUNTOS DOBLES 2X <<<", centroTableroX, 16.0f, 18);
+		} else if (juego.getBomba()) {
+			dibujarTextoC(">>> BOMBA: LIMPIA FILAS <<<", centroTableroX, 16.0f, 18);
+		}
+
 		dibujarPanel(juego);
 
 		if (pausado) {
@@ -678,47 +741,62 @@ void interfazGrafica::dibujarPanel(Juego& juego) {
 
 	dibujarTexto("Puntos", panelX, panelY, 16); panelY += 20;
 	dibujarTexto(to_string(juego.getPuntaje()), panelX, panelY, 20); 
-	panelY += 34;
+	panelY += 30;
 
 	dibujarTexto("Lineas", panelX, panelY, 16); panelY += 20;
 	dibujarTexto(to_string(juego.getLineas()), panelX, panelY, 20);
-	panelY += 34;
+	panelY += 30;
 
 	dibujarTexto("Nivel", panelX, panelY, 16); panelY += 20;
 	dibujarTexto(to_string(juego.getNivel()), panelX, panelY, 20);
-	panelY += 34;
+	panelY += 30;
 
-	dibujarTexto("Hold (C)", panelX, panelY, 16); panelY += 22;
+	dibujarTexto("Hold (C)", panelX, panelY, 16); panelY += 20;
 	if (!juego.getHold().vacia()) {
 		dibujarMiniPieza(juego.getHold().top(), panelX, panelY, 18);
 	}
-	panelY += 90;
+	panelY += 80;
 
-	dibujarTexto("Siguiente", panelX, panelY, 16); panelY += 22;
+	dibujarTexto("Siguiente", panelX, panelY, 16); panelY += 20;
 	if (juego.getSiguiente()) {
 		dibujarMiniPieza(juego.getSiguiente()->getTipo(), panelX, panelY, 18);
 	}
-	panelY += 90;
+	panelY += 80;
 
 	TipoPieza* siguientesProximos = juego.getCola().proximas3();
 	if (siguientesProximos) {
-		dibujarTexto("Cola", panelX, panelY, 16); panelY += 22;
+		dibujarTexto("Cola", panelX, panelY, 16); panelY += 20;
 		for (int indice = 0; indice < 3; indice++) {
-			dibujarMiniPieza(siguientesProximos[indice], panelX, panelY, 14);
-			panelY += 62;
+			dibujarMiniPieza(siguientesProximos[indice], panelX, panelY, 13);
+			panelY += 46;
 		}
 		delete[] siguientesProximos;
 	}
 
 	if (juego.getGameOver()) {
-		dibujarTexto("GAME OVER", panelX, panelY + 10, 20);
+		dibujarTexto("GAME OVER", panelX + 35.0f, 580.0f, 20);
 	} else if (juego.getWin()) {
-		dibujarTexto("WIN", panelX, panelY + 10, 20);
+		dibujarTexto("VICTORIA", panelX + 45.0f, 580.0f, 20);
 	}
+
+	// Recuadro neon para el proximo evento
+	float evBoxY = 635.0f;
+	sf::RectangleShape marcoEv(sf::Vector2f(200.0f, 64.0f));
+	marcoEv.setPosition(panelX, evBoxY);
+	marcoEv.setFillColor(sf::Color(8, 22, 42, 220));
+	marcoEv.setOutlineColor(COLOR_MARCO_NEON);
+	marcoEv.setOutlineThickness(1.5f);
+	ventana.draw(marcoEv);
+
+	dibujarTexto("PROXIMO EVENTO", panelX + 12.0f, evBoxY + 8.0f, 13);
+	string descEv = juego.proximoEvento();
+	int segsEv = juego.duracionParaProximoEvento((int)tiempoPartidaSegundos);
+	string txtEv = descEv + " (" + to_string(segsEv) + "s)";
+	dibujarTexto(txtEv, panelX + 12.0f, evBoxY + 32.0f, 14);
 
 	dibujarBoton(panelX, 715, 200, 40, "DESHACER (U)", 18);
 	dibujarBoton(panelX, 765, 200, 40, "REHACER (R)", 18);
-	dibujarBoton(panelX, 815, 200, 40, "PAUSA (P)", 18);
+	dibujarBoton(panelX, 815, 200, 40, "PAUSA (ESC)", 18);
 }
 
 void interfazGrafica::animarLimpiezaLineas(Juego& juego) {
@@ -733,10 +811,11 @@ void interfazGrafica::animarLimpiezaLineas(Juego& juego) {
 		}
 
 		float tiempoMs = (float)relojAnim.getElapsedTime().asMilliseconds();
-		int alfa = 160 + (int)(95.0f * sin(tiempoMs * 0.05f));
-		if (alfa > 255) alfa = 255;
-		if (alfa < 0) alfa = 0;
-		sf::Color colorBrillo(255, 255, 255, alfa);
+		float progreso = tiempoMs / TIEMPO_ANIM_LINEA_MS;
+		if (progreso > 1.0f) {
+			progreso = 1.0f;
+		}
+		float anchoBlanco = progreso * (float)ANCHO_TABLERO_PX;
 
 		ventana.clear(COLOR_FONDO);
 		dibujarFondo();
@@ -747,9 +826,9 @@ void interfazGrafica::animarLimpiezaLineas(Juego& juego) {
 		for (int i = 0; i < juego.getCantLineasPorLimpiar(); i++) {
 			int fila = juego.getLineaPorLimpiar(i);
 			float posY = (float)(ORIGEN_TABLERO_Y + fila * TAM_CELDA);
-			sf::RectangleShape barraBrillo(sf::Vector2f((float)ANCHO_TABLERO_PX, (float)TAM_CELDA));
+			sf::RectangleShape barraBrillo(sf::Vector2f(anchoBlanco, (float)TAM_CELDA));
 			barraBrillo.setPosition((float)ORIGEN_TABLERO_X, posY);
-			barraBrillo.setFillColor(colorBrillo);
+			barraBrillo.setFillColor(sf::Color::White);
 			barraBrillo.setOutlineColor(COLOR_MARCO_NEON);
 			barraBrillo.setOutlineThickness(1.0f);
 			ventana.draw(barraBrillo);
@@ -789,7 +868,7 @@ void interfazGrafica::dibujarOverlayPausa() {
 	ventana.draw(lineaDivisoria);
 
 	dibujarTextoC("JUEGO EN PAUSA", centroX, pausaY + 12.0f, 22);
-	dibujarTextoC("Presiona P o ESC para continuar", centroX, pausaY + 75.0f, 16);
+	dibujarTextoC("Presiona ESC para continuar", centroX, pausaY + 75.0f, 16);
 
 	dibujarBoton(pausaX + 35.0f, pausaY + 135.0f, 350.0f, 55.0f, "REANUDAR", 20);
 	dibujarBoton(pausaX + 35.0f, pausaY + 210.0f, 350.0f, 55.0f, "SALIR AL MENU", 20);
@@ -867,7 +946,6 @@ int interfazGrafica::ejecutar() {
 		string resultadoPartida;
 		Replay replayPartida;
 		int puntosPartida = jugarPartida(nivelActual, resultadoPartida, replayPartida);
-		guardarPuntaje(puntosPartida);
 		string accionFinal = mostrarPantallaFinal(resultadoPartida, puntosPartida, replayPartida);
 		if (accionFinal == "salir") {
 			continue;

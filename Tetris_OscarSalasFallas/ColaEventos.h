@@ -2,7 +2,7 @@
 #define COLAEVENTOS_H
 
 #include <string>
-
+using namespace std;
 enum TipoEvento {
 	EV_AUMENTO_VELOCIDAD = 0,
 	EV_PIEZA_ESPECIAL = 1,
@@ -12,7 +12,9 @@ enum TipoEvento {
 struct Evento {
 	TipoEvento tipo;
 	int momentoDisparo;
-	std::string descripcion;
+	string descripcion;
+	int momentoActivacion;
+	int duracionSegundos;
 };
 
 class ColaEventos {
@@ -33,7 +35,7 @@ public:
 	bool debeDispararse(int tiempoActual);
 	bool disparar(Evento& eSalida);
 	bool vacia();
-	int getTam();
+	void rellenar(int tiempoActual);
 };
 
 #endif
