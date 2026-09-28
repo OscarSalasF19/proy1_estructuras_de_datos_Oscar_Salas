@@ -1,0 +1,274 @@
+commit 91c3aa226d5f9d6ecc454f51f9a5aaf90b9be936
+Author: OscarSalasF19 <oscar19082005@gmail.com>
+Date:   2026-09-27
+
+    add readme.md
+
+ README.md                                          | 126 ++++++++++++++++++++-
+ .../Tetris_OscarSalasFallas.zpr                    |  31 +++--
+ Tetris_OscarSalasFallas/mejores_puntajes.txt       |  14 +--
+ 3 files changed, 141 insertions(+), 30 deletions(-)
+
+commit a1d83797ac12c1e9bf5f2961ef36987ea1ee93db
+Author: OscarSalasF19 <oscar19082005@gmail.com>
+Date:   2026-09-27
+
+    manejo de eventos en logica e interfaz
+
+ Tetris_OscarSalasFallas/ColaEventos.cpp      | 105 ++++++++--------
+ Tetris_OscarSalasFallas/ColaEventos.h        |   8 +-
+ Tetris_OscarSalasFallas/Juego.cpp            |  96 +++++++++++++--
+ Tetris_OscarSalasFallas/Juego.h              |  12 +-
+ Tetris_OscarSalasFallas/Replay.cpp           |   1 -
+ Tetris_OscarSalasFallas/Replay.h             |   1 +
+ Tetris_OscarSalasFallas/interfazGrafica.cpp  | 174 +++++++++++++++++++--------
+ Tetris_OscarSalasFallas/interfazGrafica.h    |   7 +-
+ Tetris_OscarSalasFallas/mejores_puntajes.txt |   3 +
+ 9 files changed, 291 insertions(+), 116 deletions(-)
+
+commit df936ca857df71d04dc5a1410579f5ca9708fc2a
+Author: OscarSalasF19 <oscar19082005@gmail.com>
+Date:   2026-09-27
+
+    manejo de estado y mejoras estadisticas
+
+ Tetris_OscarSalasFallas/ColaPiezas.cpp             |  14 +
+ Tetris_OscarSalasFallas/ColaPiezas.h               |   1 +
+ Tetris_OscarSalasFallas/EstadoJuego.cpp            |  35 +-
+ Tetris_OscarSalasFallas/EstadoJuego.h              |  13 +-
+ Tetris_OscarSalasFallas/Juego.cpp                  |  58 +-
+ Tetris_OscarSalasFallas/Juego.h                    |   7 +
+ Tetris_OscarSalasFallas/Puntaje.cpp                |  12 +
+ Tetris_OscarSalasFallas/Puntaje.h                  |   5 +-
+ Tetris_OscarSalasFallas/Replay.cpp                 |  50 +-
+ Tetris_OscarSalasFallas/Replay.h                   |   5 +
+ .../Tetris_OscarSalasFallas.zpr                    |  55 +-
+ Tetris_OscarSalasFallas/interfazGrafica.cpp        | 945 +++++++++++++++++----
+ Tetris_OscarSalasFallas/interfazGrafica.h          |  19 +-
+ Tetris_OscarSalasFallas/mejores_puntajes.txt       |  10 +
+ 14 files changed, 1023 insertions(+), 206 deletions(-)
+
+commit ab5bc8acb85213a0a34c664ffec5725a622bf1fa
+Author: OscarSalasF19 <oscar19082005@gmail.com>
+Date:   2026-09-26
+
+    interfaz grafica
+    
+    interfaz grafica de juego normal, adicion de fondo y fuente para los textos
+
+ Tetris_OscarSalasFallas/Constantes.h               |  41 ++--
+ Tetris_OscarSalasFallas/Juego.cpp                  |   2 +
+ Tetris_OscarSalasFallas/Pieza.cpp                  |  44 ++--
+ Tetris_OscarSalasFallas/Puntaje.cpp                |   4 +
+ Tetris_OscarSalasFallas/Puntaje.h                  |   1 +
+ Tetris_OscarSalasFallas/Replay.cpp                 |   1 +
+ Tetris_OscarSalasFallas/Tablero.cpp                |  11 +-
+ .../Tetris_OscarSalasFallas.zpr                    |  29 ++-
+ Tetris_OscarSalasFallas/interfazGrafica.cpp        | 246 +++++++++++++++++++++
+ Tetris_OscarSalasFallas/interfazGrafica.h          |  34 +++
+ Tetris_OscarSalasFallas/main.cpp                   |   9 +-
+ .../resources/fonts/batmfa__.ttf                   | Bin 0 -> 55552 bytes
+ .../resources/fonts/batmfo__.ttf                   | Bin 0 -> 71136 bytes
+ .../resources/images/background.jpg                | Bin 0 -> 266515 bytes
+ 14 files changed, 366 insertions(+), 56 deletions(-)
+
+commit 28934f84e1a1d068e956b9b763e2331ab8dcb8ba
+Author: OscarSalasF19 <oscar19082005@gmail.com>
+Date:   2026-09-26
+
+    logica de ordenamiento
+
+ Tetris_OscarSalasFallas/Juego.h                    |  2 +-
+ Tetris_OscarSalasFallas/Puntaje.cpp                | 87 ++++++++++++++++++++++
+ Tetris_OscarSalasFallas/Puntaje.h                  | 25 +++++++
+ .../Tetris_OscarSalasFallas.zpr                    | 24 +++---
+ 4 files changed, 127 insertions(+), 11 deletions(-)
+
+commit 5fd0d2119b924f0385dfcab0e3bd0c0a39a51f4a
+Merge: 5bf330a 1662895
+Author: OscarSalasF19 <oscar19082005@gmail.com>
+Date:   2026-09-26
+
+    Merge pull request #2 from OscarSalasF19/creacion-logica
+    
+    Creacion logica
+
+commit 1662895c6f152358e0b8bbf8a910dff9ef73b369
+Author: OscarSalasF19 <oscar19082005@gmail.com>
+Date:   2026-09-26
+
+    ajustes finales a logica de juego
+
+ Tetris_OscarSalasFallas/ColaEventos.cpp            |   2 +-
+ Tetris_OscarSalasFallas/Constantes.h               |   4 -
+ Tetris_OscarSalasFallas/EstadoJuego.cpp            |   1 +
+ Tetris_OscarSalasFallas/Juego.cpp                  | 167 ++++++++++++++++++---
+ Tetris_OscarSalasFallas/Juego.h                    |  20 ++-
+ Tetris_OscarSalasFallas/Pieza.cpp                  |   2 +-
+ Tetris_OscarSalasFallas/Replay.cpp                 |   8 +
+ Tetris_OscarSalasFallas/Replay.h                   |   1 +
+ Tetris_OscarSalasFallas/Tablero.cpp                |   7 +-
+ Tetris_OscarSalasFallas/Tablero.h                  |   8 +-
+ .../Tetris_OscarSalasFallas.zpr                    |  43 ++++--
+ 11 files changed, 210 insertions(+), 53 deletions(-)
+
+commit feeba6768b9cb35961c8c168a2c73f3532181008
+Author: OscarSalasF19 <oscar19082005@gmail.com>
+Date:   2026-09-26
+
+    fix errores de logica
+    
+    errores de manejo de indices, eliminacion y reglas del juego
+
+ Tetris_OscarSalasFallas/EstadoJuego.cpp |  1 +
+ Tetris_OscarSalasFallas/Juego.cpp       |  2 ++
+ Tetris_OscarSalasFallas/Replay.cpp      |  2 ++
+ Tetris_OscarSalasFallas/Tablero.cpp     | 13 +++++++++----
+ Tetris_OscarSalasFallas/Tablero.h       |  7 ++++---
+ 5 files changed, 18 insertions(+), 7 deletions(-)
+
+commit fb37bee8aa3afeac440cde500225f4024197cf81
+Author: OscarSalasF19 <oscar19082005@gmail.com>
+Date:   2026-09-25
+
+    add clase juego y modifciaciones a clases
+
+ Tetris_OscarSalasFallas/EstadoJuego.cpp            |   4 +-
+ Tetris_OscarSalasFallas/EstadoJuego.h              |   2 +-
+ Tetris_OscarSalasFallas/Juego.cpp                  | 136 +++++++++++++++++++++
+ Tetris_OscarSalasFallas/Juego.h                    |  45 +++++++
+ Tetris_OscarSalasFallas/Replay.cpp                 |  16 +--
+ Tetris_OscarSalasFallas/Replay.h                   |   2 +-
+ Tetris_OscarSalasFallas/Tablero.cpp                |  46 ++++++-
+ Tetris_OscarSalasFallas/Tablero.h                  |   7 +-
+ .../Tetris_OscarSalasFallas.zpr                    |  33 +++--
+ Tetris_OscarSalasFallas/main.cpp                   |   1 +
+ 10 files changed, 259 insertions(+), 33 deletions(-)
+
+commit 5bf330a7c55e38ca40c1847d36c0157d077fb63d
+Merge: f4c283a 46edaca
+Author: OscarSalasF19 <oscar19082005@gmail.com>
+Date:   2026-09-25
+
+    Merge pull request #1 from OscarSalasF19/generar-clases
+    
+    Generar clases
+
+commit 46edacad2c8c1d12a2b00d7ca3e4df1596e73d6c
+Author: OscarSalasF19 <oscar19082005@gmail.com>
+Date:   2026-09-25
+
+    fix on estadoJuego y replay clases
+
+ Tetris_OscarSalasFallas/EstadoJuego.cpp |  5 +++--
+ Tetris_OscarSalasFallas/EstadoJuego.h   |  4 ++--
+ Tetris_OscarSalasFallas/Replay.cpp      | 10 ++++++++--
+ Tetris_OscarSalasFallas/Replay.h        |  2 +-
+ Tetris_OscarSalasFallas/main.cpp        |  8 +++++---
+ 5 files changed, 19 insertions(+), 10 deletions(-)
+
+commit 9f782ec027b472e6d3735bdc14694001bc40d781
+Author: OscarSalasF19 <oscar19082005@gmail.com>
+Date:   2026-09-25
+
+    update clases
+
+ Tetris_OscarSalasFallas/EstadoJuego.cpp |  4 ++--
+ Tetris_OscarSalasFallas/Tablero.cpp     | 16 ++++++++++++++++
+ Tetris_OscarSalasFallas/Tablero.h       |  1 +
+ 3 files changed, 19 insertions(+), 2 deletions(-)
+
+commit db645e613cc155e67e15ed8ab6d74e0e8a6eb922
+Author: OscarSalasF19 <oscar19082005@gmail.com>
+Date:   2026-09-25
+
+    add cola eventos, replay y estado clases
+
+ Tetris_OscarSalasFallas/ColaEventos.cpp            | 77 +++++++++++++++++++
+ Tetris_OscarSalasFallas/ColaEventos.h              | 39 ++++++++++
+ Tetris_OscarSalasFallas/ColaPiezas.cpp             |  2 +-
+ Tetris_OscarSalasFallas/EstadoJuego.cpp            | 67 +++++++++++++++++
+ Tetris_OscarSalasFallas/EstadoJuego.h              | 39 ++++++++++
+ Tetris_OscarSalasFallas/Replay.cpp                 | 86 ++++++++++++++++++++++
+ Tetris_OscarSalasFallas/Replay.h                   | 31 ++++++++
+ Tetris_OscarSalasFallas/Tablero.cpp                |  3 +-
+ .../Tetris_OscarSalasFallas.zpr                    | 42 ++++++++++-
+ 9 files changed, 380 insertions(+), 6 deletions(-)
+
+commit 97b1e5b394bee8a955ecc5b38d851dc4e281e53f
+Author: OscarSalasF19 <oscar19082005@gmail.com>
+Date:   2026-09-25
+
+    add clase tablero
+
+ Tetris_OscarSalasFallas/Tablero.cpp | 128 ++++++++++++++++++++++++++++++++++++
+ Tetris_OscarSalasFallas/Tablero.h   |  28 ++++++++
+ Tetris_OscarSalasFallas/main.cpp    |   3 +-
+ 3 files changed, 157 insertions(+), 2 deletions(-)
+
+commit 216e7662765073eaa65583a4049e3bf0d8dadc97
+Author: OscarSalasF19 <oscar19082005@gmail.com>
+Date:   2026-09-25
+
+    add pilaHoldClase
+
+ Tetris_OscarSalasFallas/PilaHold.cpp | 45 ++++++++++++++++++++++++++++++++++++
+ Tetris_OscarSalasFallas/PilaHold.h   | 22 ++++++++++++++++++
+ Tetris_OscarSalasFallas/main.cpp     | 22 +++---------------
+ 3 files changed, 70 insertions(+), 19 deletions(-)
+
+commit eab38069c28a19a2d866eedaf5dc500d2d11f133
+Author: OscarSalasF19 <oscar19082005@gmail.com>
+Date:   2026-09-25
+
+    add clase piezas, variables constantes, piezas
+
+ Tetris_OscarSalasFallas/ColaPiezas.cpp             |  86 +++++++++++++
+ Tetris_OscarSalasFallas/ColaPiezas.h               |  30 +++++
+ Tetris_OscarSalasFallas/Constantes.h               |  53 ++++++++
+ Tetris_OscarSalasFallas/Pieza.cpp                  | 138 +++++++++++++++++++++
+ Tetris_OscarSalasFallas/Pieza.h                    |  52 ++++++++
+ .../Tetris_OscarSalasFallas.zpr                    |  17 ++-
+ Tetris_OscarSalasFallas/main.cpp                   |   1 +
+ 7 files changed, 374 insertions(+), 3 deletions(-)
+
+commit f4c283a9d25f4f06bdc55f6b2463432be9939881
+Author: OscarSalasF19 <oscar19082005@gmail.com>
+Date:   2026-09-24
+
+    Update .gitignore
+
+ .gitignore | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 93a1756b41eba05e705fed71b4dc9e4edaef023f
+Author: OscarSalasF19 <oscar19082005@gmail.com>
+Date:   2026-09-24
+
+    update gitignore
+
+ .gitignore | 2 ++
+ 1 file changed, 2 insertions(+)
+
+commit c99ba37a8d62b7120d7802531f99add8e30c2ce5
+Author: OscarSalasF19 <oscar19082005@gmail.com>
+Date:   2026-09-08
+
+    initial commit
+
+ Proyecto1 - Estructuras de datos.pdf               | Bin 0 -> 197902 bytes
+ Tetris_OscarSalasFallas/Leeme.txt                  |   6 +
+ .../Tetris_OscarSalasFallas.zpr                    | 164 +++++++++++++++++++++
+ Tetris_OscarSalasFallas/main.cpp                   |  26 ++++
+ Tetris_OscarSalasFallas/sfml.png                   | Bin 0 -> 65722 bytes
+ 5 files changed, 196 insertions(+)
+
+commit 183d3427eb10a46ba11b9176d0b0a9b7c1a6876d
+Author: OscarSalasF19 <oscar19082005@gmail.com>
+Date:   2026-08-27
+
+    Initial commit
+
+ .gitignore | 69 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ README.md  |  1 +
+ 2 files changed, 70 insertions(+)
